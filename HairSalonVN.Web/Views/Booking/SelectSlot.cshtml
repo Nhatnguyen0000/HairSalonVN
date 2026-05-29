@@ -266,28 +266,42 @@
 
     // ── 3. Time slots ───────────────────────────────────────────────
     function loadTimeSlots() {
-        if (!selectedStylistId || !selectedDateInput.value) return;
+        if (!selectedStylistId || !selectedDateInput.value) {
+            console.log('Skipping loadTimeSlots: missing staffId or date');
+            return;
+        }
 
         timeslotContent.innerHTML =
-            '<div class="timeslot-loading"><div class="spinner"></div><p>Đang tải khung giờ...</p></div>';
+            '<div class="timeslot-loading"><div class="timeslot-loading-spinner"></div><p>Đang tải khung giờ...</p></div>';
 
         var url = '/Booking/GetSlots?staffId=' + selectedStylistId +
                   '&serviceId=' + serviceId +
                   '&date=' + encodeURIComponent(selectedDateInput.value);
 
+        console.log('Loading slots from:', url);
+
         fetch(url)
-            .then(function(r) { return r.json(); })
+            .then(function(r) {
+                console.log('Response status:', r.status);
+                return r.json();
+            })
             .then(function(resp) {
+                console.log('API Response:', resp);
                 var slots = resp && resp.data ? resp.data : [];
+                if (slots.length === 0 && resp && resp.errors) {
+                    console.log('API Errors:', resp.errors);
+                }
                 renderTimeSlots(slots);
             })
-            .catch(function() {
+            .catch(function(err) {
+                console.error('Fetch error:', err);
                 timeslotContent.innerHTML =
-                    '<div class="timeslot-placeholder"><p>Lỗi tải khung giờ. Vui lòng thử lại.</p></div>';
+                    '<div class="timeslot-placeholder"><p>Lỗi tải khung giờ. Vui lòng thử lại.</p><small>' + err.message + '</small></div>';
             });
     }
 
     function renderTimeSlots(slots) {
+        console.log('Rendering slots:', slots);
         if (!slots || slots.length === 0) {
             timeslotContent.innerHTML =
                 '<div class="timeslot-placeholder"><p>Không có khung giờ trống cho ngày này</p></div>';
@@ -298,8 +312,9 @@
         grid.className = 'timeslot-grid';
 
         slots.forEach(function(slot) {
-            var label  = slot.label || slot.Label || slot.time || '??:??';
-            var isAvail = slot.isAvail !== false && slot.IsAvail !== false;
+            var label  = slot.label || slot.Label || slot.time || slot.Time || '??:??';
+            var isAvail = slot.isAvail !== false && slot.IsAvail !== false && slot.isAvailable !== false;
+            console.log('Slot:', label, 'Available:', isAvail);
             var el = document.createElement('div');
             el.className = 'timeslot-slot' + (isAvail ? '' : ' disabled');
             el.textContent = label;
@@ -319,6 +334,7 @@
         });
         el.classList.add('selected');
         selectedTime = label;
+        console.log('Selected time:', label);
         updateSummary();
     }
 
