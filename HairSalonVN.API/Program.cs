@@ -61,13 +61,15 @@ builder.Services.AddScoped<IAppointmentService>(sp =>
 {
     var ctx = sp.GetRequiredService<SalonDbContext>();
     var email = sp.GetRequiredService<EmailService>();
+    var logger = sp.GetRequiredService<ILogger<AppointmentService>>();
     return new AppointmentService(
         sp.GetRequiredService<IRepository<Appointment>>(),
         sp.GetRequiredService<IRepository<Service>>(),
         sp.GetRequiredService<IRepository<WorkingHour>>(),
         sp.GetRequiredService<IRepository<Staff>>(),
         ctx,
-        email);
+        email,
+        logger);
 });
 
 builder.Services.AddSingleton<EmailBackgroundHandler>();

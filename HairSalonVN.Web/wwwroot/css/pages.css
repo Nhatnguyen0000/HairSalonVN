@@ -676,3 +676,207 @@ input.error {
     .summary-info { display: none; }
     .booking-summary-bar { justify-content: center; }
 }
+
+/* ── Professional Bill Styles ── */
+.booking-bill {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.bill-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.bill-logo {
+    width: 48px;
+    height: 48px;
+    background: rgba(201, 154, 46, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--c-accent, #c99a2e);
+    flex-shrink: 0;
+}
+
+.bill-title-wrap {
+    flex: 1;
+}
+
+.bill-title-wrap h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: 1px;
+    color: #fff;
+}
+
+.bill-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.bill-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e5e7eb 20%, #e5e7eb 80%, transparent);
+    margin: 0;
+}
+
+.bill-info {
+    padding: 16px 24px;
+    background: #f9fafb;
+}
+
+.bill-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.85rem;
+}
+
+.bill-info-label {
+    color: #6b7280;
+}
+
+.bill-info-value {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.bill-section {
+    padding: 20px 24px;
+}
+
+.bill-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #9ca3af;
+    margin: 0 0 16px;
+    text-transform: uppercase;
+}
+
+.bill-service-item {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+}
+
+.bill-service-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.bill-service-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1f2937;
+}
+
+.bill-service-price {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--c-accent, #c99a2e);
+}
+
+.bill-service-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bill-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.bill-detail svg {
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.bill-detail strong {
+    color: #374151;
+}
+
+.bill-summary {
+    padding: 16px 24px;
+    background: #f9fafb;
+}
+
+.bill-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.bill-summary-row.discount {
+    color: #10b981;
+}
+
+.bill-summary-row.total {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1f2937;
+    border-top: 2px dashed #e5e7eb;
+    margin-top: 8px;
+    padding-top: 16px;
+}
+
+.bill-total-amount {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--c-accent, #c99a2e);
+}
+
+.bill-footer {
+    padding: 20px 24px;
+    text-align: center;
+}
+
+.bill-payment-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(201, 154, 46, 0.08);
+    border: 1px dashed var(--c-accent, #c99a2e);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #92400e;
+    margin-bottom: 16px;
+}
+
+.bill-payment-note svg {
+    color: var(--c-accent, #c99a2e);
+    flex-shrink: 0;
+}
+
+.bill-thanks {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+@media (max-width: 900px) {
+    .booking-bill {
+        margin-top: 24px;
+    }
+}

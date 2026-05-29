@@ -25,6 +25,7 @@ namespace HairSalonVN.API.Services
         private readonly IRepository<Staff> _staffRepo;
         private readonly SalonDbContext _ctx;
         private readonly EmailService _email;
+        private readonly ILogger<AppointmentService> _logger;
 
         // Chỉ lock cho việc booking concurrency, không cache data
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
@@ -35,7 +36,8 @@ namespace HairSalonVN.API.Services
             IRepository<WorkingHour> w,
             IRepository<Staff> staffRepo,
             SalonDbContext ctx,
-            EmailService email)
+            EmailService email,
+            ILogger<AppointmentService> logger)
         {
             _apptRepo = a;
             _svcRepo = s;
@@ -43,6 +45,7 @@ namespace HairSalonVN.API.Services
             _staffRepo = staffRepo;
             _ctx = ctx;
             _email = email;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<AppointmentResponseDto>> GetAllAsync(Guid requesterId, string role)
@@ -158,17 +161,29 @@ namespace HairSalonVN.API.Services
 
         public async Task<ApiResponse<AppointmentResponseDto>> CreateAsync(AppointmentCreateDto dto, Guid customerId)
         {
+            _logger.LogInformation("CreateAsync called - ServiceId: {ServiceId}, StaffId: {StaffId}, Date: {Date}", 
+                dto.ServiceId, dto.StaffId, dto.AppointmentDate);
+
             var service = await _svcRepo.GetByIdAsync(dto.ServiceId);
             if (service == null || !service.IsActive)
+            {
+                _logger.LogWarning("Service not found or inactive: {ServiceId}", dto.ServiceId);
                 return ApiResponse<AppointmentResponseDto>.Fail("Dich vu khong ton tai hoac da ngung");
+            }
 
             var staff = await _staffRepo.GetByIdAsync(dto.StaffId);
             if (staff == null || !staff.IsAvailable)
+            {
+                _logger.LogWarning("Staff not found or unavailable: {StaffId}", dto.StaffId);
                 return ApiResponse<AppointmentResponseDto>.Fail("Stylist khong ton tai hoac da ngung nhan lich");
+            }
 
             var startTime = dto.AppointmentDate;
             if (startTime <= DateTime.Now)
+            {
+                _logger.LogWarning("Invalid appointment time: {Date}", startTime);
                 return ApiResponse<AppointmentResponseDto>.Fail("Vui long chon thoi gian trong tuong lai");
+            }
 
             var endTime = startTime.AddMinutes(service.DurationMinutes);
 
@@ -177,7 +192,10 @@ namespace HairSalonVN.API.Services
             try
             {
                 if (await HasSlotConflictAsync(dto.StaffId, startTime, endTime))
+                {
+                    _logger.LogWarning("Slot conflict for StaffId: {StaffId} at {Date}", dto.StaffId, startTime);
                     return ApiResponse<AppointmentResponseDto>.Fail("Khung gio nay da co nguoi dat");
+                }
 
                 var appt = new Appointment
                 {
@@ -196,9 +214,10 @@ namespace HairSalonVN.API.Services
                 await _apptRepo.AddAsync(appt);
                 await _apptRepo.SaveChangesAsync();
 
+                _logger.LogInformation("Appointment created successfully: {AppointmentId}", appt.Id);
+
                 _ = _email.SendBookingConfirmationAsync(appt.Id);
 
-                // Load lai data moi nhat
                 var fullAppt = await _ctx.Appointments
                     .AsNoTracking()
                     .Include(a => a.Service)
@@ -217,22 +236,40 @@ namespace HairSalonVN.API.Services
 
         public async Task<ApiResponse<AppointmentResponseDto>> GuestCreateAsync(AppointmentCreateDto dto)
         {
+            _logger.LogInformation("GuestCreateAsync called - ServiceId: {ServiceId}, StaffId: {StaffId}, Date: {Date}, Guest: {GuestName}",
+                dto.ServiceId, dto.StaffId, dto.AppointmentDate, dto.GuestName);
+
             if (string.IsNullOrWhiteSpace(dto.GuestName))
+            {
+                _logger.LogWarning("Guest name is empty");
                 return ApiResponse<AppointmentResponseDto>.Fail("Vui long nhap ho ten");
+            }
             if (string.IsNullOrWhiteSpace(dto.GuestPhone))
+            {
+                _logger.LogWarning("Guest phone is empty");
                 return ApiResponse<AppointmentResponseDto>.Fail("Vui long nhap so dien thoai");
+            }
 
             var service = await _svcRepo.GetByIdAsync(dto.ServiceId);
             if (service == null || !service.IsActive)
+            {
+                _logger.LogWarning("Service not found or inactive: {ServiceId}", dto.ServiceId);
                 return ApiResponse<AppointmentResponseDto>.Fail("Dich vu khong ton tai hoac da ngung");
+            }
 
             var staff = await _staffRepo.GetByIdAsync(dto.StaffId);
             if (staff == null || !staff.IsAvailable)
+            {
+                _logger.LogWarning("Staff not found or unavailable: {StaffId}", dto.StaffId);
                 return ApiResponse<AppointmentResponseDto>.Fail("Stylist khong ton tai hoac da ngung nhan lich");
+            }
 
             var startTime = dto.AppointmentDate;
             if (startTime <= DateTime.Now)
+            {
+                _logger.LogWarning("Invalid appointment time: {Date}", startTime);
                 return ApiResponse<AppointmentResponseDto>.Fail("Vui long chon thoi gian trong tuong lai");
+            }
 
             var endTime = startTime.AddMinutes(service.DurationMinutes);
 
@@ -241,7 +278,10 @@ namespace HairSalonVN.API.Services
             try
             {
                 if (await HasSlotConflictAsync(dto.StaffId, startTime, endTime))
+                {
+                    _logger.LogWarning("Slot conflict for StaffId: {StaffId} at {Date}", dto.StaffId, startTime);
                     return ApiResponse<AppointmentResponseDto>.Fail("Khung gio nay da co nguoi dat");
+                }
 
                 var appt = new Appointment
                 {
@@ -261,6 +301,8 @@ namespace HairSalonVN.API.Services
 
                 await _apptRepo.AddAsync(appt);
                 await _apptRepo.SaveChangesAsync();
+
+                _logger.LogInformation("Guest appointment created successfully: {AppointmentId}", appt.Id);
 
                 _ = _email.SendBookingConfirmationAsync(appt.Id);
 
