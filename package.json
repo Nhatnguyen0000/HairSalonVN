@@ -1,0 +1,24 @@
+{
+  "name": "hairsalonvn",
+  "version": "1.0.0",
+  "description": "1. [Giới thiệu](#1-giới-thiệu)\r 2. [Kiến trúc hệ thống](#2-kiến-trúc-hệ-thống)\r 3. [Cấu trúc dự án](#3-cấu-trúc-dựán)\r 4. [Tính năng đã triển khai](#4-tính-năng-đã-triển-khai)\r 5. [Security & Validation](#5-security--validation)\r 6. [Hướng dẫn Demo](#6-hướng-dẫn-demo)\r 7. [Sơ đồ UML](#7-sơ-đồ-uml)\r 8. [Entity Relationship Diagram (ERD)](#8-entity-relationship-diagram-erd)\r 9. [API Endpoints](#9-api-endpoints)\r 10. [Tài khoản Demo](#10-tài-khoản-demo)\r 11. [Chạy ứng dụng](#11-chạy-ứng-dụng)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nhatnguyen0000/HairSalonVN.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Nhatnguyen0000/HairSalonVN/issues"
+  },
+  "homepage": "https://github.com/Nhatnguyen0000/HairSalonVN#readme",
+  "dependencies": {
+    "docx": "^9.7.1"
+  }
+}
