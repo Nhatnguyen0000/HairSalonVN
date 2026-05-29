@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "Đặt lịch thành công";
+    ViewData["BodyClass"] = "page-booking";
+    var bookingCode = ViewBag.BookingCode;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<div class="page-hero success">
+    <div class="container" style="text-align:center">
+        <div class="success-check-circle">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+        </div>
+        <h1>Đặt lịch thành công!</h1>
+        <p class="lead">Cảm ơn bạn đã đặt lịch tại LUXE Hair Salon.</p>
+        @if (!string.IsNullOrEmpty(bookingCode))
+        {
+            <div class="booking-code-card">
+                <span class="booking-code-label">Mã đặt lịch của bạn</span>
+                <span class="booking-code-text">@bookingCode</span>
+                <div class="booking-code-info">
+                    <div><strong>Dịch vụ:</strong> @TempData["BookingService"]</div>
+                    <div><strong>Stylist:</strong> @TempData["BookingStaff"]</div>
+                    <div><strong>Thời gian:</strong> @TempData["BookingDate"] @TempData["BookingTime"]</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container" style="max-width:560px;text-align:center">
+        <p class="text-muted" style="margin-bottom:28px">Vui lòng ghi nhớ mã để tra cứu hoặc hủy lịch. Salon sẽ liên hệ xác nhận sớm nhất.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <a href="/Booking/MyBookings" class="btn btn-primary">Xem lịch của tôi</a>
+            <a href="/Booking" class="btn btn-secondary">Đặt lịch khác</a>
+            <a href="/" class="btn btn-ghost">Về trang chủ</a>
+        </div>
+    </div>
+</div>

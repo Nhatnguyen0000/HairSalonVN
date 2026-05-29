@@ -1,0 +1,125 @@
+@using HairSalonVN.Web.Models.Booking
+@model IEnumerable<StaffSlotViewModel>
+@{
+    ViewData["Title"] = "Quản lý nhân viên";
+    ViewBag.DashboardRole = "Admin";
+    ViewBag.ActiveMenu = "staff";
+    var staffList = Model?.ToList() ?? new List<StaffSlotViewModel>();
+}
+
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Quản lý nhân viên</h1>
+        <p class="luxe-date">Stylist và lịch làm việc</p>
+    </div>
+</div>
+
+<div class="luxe-content">
+    <div class="luxe-stats">
+        <div class="stat-card stat-card-primary">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@staffList.Count</span>
+                <span class="stat-text">Tổng nhân viên</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-success">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@staffList.Count(s => s.IsAvailable)</span>
+                <span class="stat-text">Đang hoạt động</span>
+            </div>
+        </div>
+    </div>
+
+    @if (!staffList.Any())
+    {
+        <div class="luxe-empty">
+            <p>Chưa có nhân viên nào</p>
+        </div>
+    }
+    else
+    {
+        <div class="staff-grid">
+            @foreach (var staff in staffList)
+            {
+                var staffId = staff.StaffId != Guid.Empty ? staff.StaffId : staff.Id;
+                <div class="staff-profile-card">
+                    <div class="staff-header">
+                        @if (!string.IsNullOrEmpty(staff.AvatarUrl))
+                        {
+                            <img src="@staff.AvatarUrl" alt="@staff.StaffName" class="staff-avatar-large" />
+                        }
+                        else
+                        {
+                            <div class="staff-avatar-large">@staff.StaffInitial</div>
+                        }
+                        <div class="staff-info">
+                            <h4 class="staff-name">@staff.StaffName</h4>
+                            <p class="staff-specialty">@staff.Specialty</p>
+                            <span class="luxe-badge @(staff.IsAvailable ? "confirmed" : "cancelled")">
+                                @(staff.IsAvailable ? "Đang hoạt động" : "Tạm ngưng")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="staff-body">
+                        @if (!string.IsNullOrEmpty(staff.Bio))
+                        {
+                            <p class="staff-bio">@staff.Bio</p>
+                        }
+                        @if (staff.Services?.Any() == true)
+                        {
+                            <div class="staff-services">
+                                <span class="services-label">Dịch vụ</span>
+                                <div class="services-tags">
+                                    @foreach (var svc in staff.Services)
+                                    {
+                                        <span class="service-tag">@svc</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        @if (staff.WorkingHours?.Any() == true)
+                        {
+                            <div class="staff-hours">
+                                <span class="hours-label">Giờ làm việc</span>
+                                <div class="hours-list">
+                                    @foreach (var wh in staff.WorkingHours.OrderBy(w => w.DayOfWeek))
+                                    {
+                                        <div class="hour-item">
+                                            <span class="day-name">@DayLabel(wh.DayOfWeek)</span>
+                                            <span class="time-range">@wh.StartTime – @wh.EndTime</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <a href="/Admin/EditStaffHours?id=@staffId" class="luxe-btn luxe-btn-sm" style="margin-top:16px;display:inline-flex;">
+                            Chỉnh giờ làm việc
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@functions {
+    static string DayLabel(int d) => d switch
+    {
+        0 => "CN", 1 => "T2", 2 => "T3", 3 => "T4", 4 => "T5", 5 => "T6", 6 => "T7",
+        _ => "?"
+    };
+}

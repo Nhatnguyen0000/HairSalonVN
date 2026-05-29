@@ -1,0 +1,87 @@
+@using HairSalonVN.Web.Models.Admin
+@model StaffHoursEditViewModel
+@{
+    ViewData["Title"] = "Giờ làm việc";
+    ViewBag.DashboardRole = "Admin";
+    ViewBag.ActiveMenu = "staff";
+}
+
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Giờ làm việc</h1>
+        <p class="luxe-date">@Model.StaffName</p>
+    </div>
+    <div class="luxe-topbar-right">
+        <a href="/Admin/Staff" class="luxe-btn">← Quay lại</a>
+    </div>
+</div>
+
+<div class="luxe-content">
+    <div class="luxe-panel">
+        <div class="luxe-panel-head">
+            <h2>Chỉnh sửa giờ làm việc</h2>
+        </div>
+        <div class="luxe-panel-body">
+            <form id="hoursForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="StaffId" value="@Model.StaffId" />
+                <input type="hidden" name="StaffName" value="@Model.StaffName" />
+
+                <div class="staff-hours-form">
+                    @for (var i = 0; i < Model.Days.Count; i++)
+                    {
+                        <div class="staff-hours-row">
+                            <input type="hidden" name="Days[@i].DayOfWeek" value="@Model.Days[i].DayOfWeek" />
+                            <input type="hidden" name="Days[@i].DayLabel" value="@Model.Days[i].DayLabel" />
+                            <label class="staff-hours-day">
+                                <input type="checkbox" name="Days[@i].IsOpen" value="true" @(Model.Days[i].IsOpen ? "checked" : "") />
+                                <span>@Model.Days[i].DayLabel</span>
+                            </label>
+                            <input type="time" name="Days[@i].StartTime" value="@Model.Days[i].StartTime" class="luxe-input-sm" />
+                            <span class="staff-hours-sep">—</span>
+                            <input type="time" name="Days[@i].EndTime" value="@Model.Days[i].EndTime" class="luxe-input-sm" />
+                        </div>
+                    }
+                </div>
+
+                <div style="margin-top:24px;display:flex;gap:12px;">
+                    <button type="submit" class="luxe-btn" id="saveBtn">
+                        <span>Lưu giờ làm việc</span>
+                    </button>
+                    <a href="/Admin/Staff" class="luxe-btn luxe-btn-outline">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function() {
+    document.getElementById('hoursForm').onsubmit = function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Đang lưu...';
+        var formData = new FormData(this);
+        fetch('/Admin/EditStaffHours', { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(resp) {
+                if (resp.success) {
+                    showToast(resp.message || 'Lưu thành công!', 'success');
+                    setTimeout(function() { location.href = '/Admin/Staff'; }, 1000);
+                } else {
+                    showToast(resp.message || 'Có lỗi xảy ra', 'error');
+                    btn.disabled = false;
+                    btn.querySelector('span').textContent = 'Lưu giờ làm việc';
+                }
+            })
+            .catch(function() {
+                showToast('Không thể kết nối máy chủ', 'error');
+                btn.disabled = false;
+                btn.querySelector('span').textContent = 'Lưu giờ làm việc';
+            });
+    };
+})();
+</script>
+}

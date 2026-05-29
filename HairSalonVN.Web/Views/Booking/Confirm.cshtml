@@ -1,0 +1,239 @@
+@using HairSalonVN.Web.Models.Booking
+@model AppointmentCreateViewModel
+@{
+    ViewData["Title"] = "Xác nhận đặt lịch";
+    ViewData["BodyClass"] = "page-booking";
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("AccessToken"));
+    var serviceName = ViewBag.ServiceName ?? Model.ServiceName;
+    var servicePrice = (decimal)(ViewBag.ServicePrice ?? Model.ServicePrice);
+    var duration = (int)(ViewBag.Duration ?? Model.Duration);
+    var staffName = ViewBag.StaffName ?? Model.StaffName;
+    var serviceId = Model.ServiceId;
+    var staffId = Model.StaffId;
+    var apptDate = Model.AppointmentDate;
+
+    // Day-of-week name in Vietnamese
+    var dayNames = new[] { "Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7" };
+    var dayOfWeek = apptDate.DayOfWeek == System.DayOfWeek.Sunday ? 0 : (int)apptDate.DayOfWeek;
+    var dateDisplay = dayNames[dayOfWeek] + ", " + apptDate.ToString("dd/MM/yyyy");
+    var timeDisplay = apptDate.ToString("HH:mm");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<div class="page-hero">
+    <div class="container">
+        <a href="/Booking/SelectSlot?serviceId=@serviceId&date=@apptDate.ToString("yyyy-MM-dd")" class="back-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12,19 5,12 12,5"/>
+            </svg>
+            Quay lại chọn giờ
+        </a>
+        <span class="page-eyebrow" style="color:var(--c-accent)">Bước 3/3</span>
+        <h1>Xác nhận đặt lịch</h1>
+        <p class="lead">Kiểm tra thông tin trước khi hoàn tất</p>
+        <div class="booking-steps">
+            <span class="booking-step done"><span class="num">✓</span> Dịch vụ</span>
+            <span class="booking-step done"><span class="num">✓</span> Stylist &amp; giờ</span>
+            <span class="booking-step active"><span class="num">3</span> Xác nhận</span>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container">
+        <div class="confirm-layout">
+
+            @* Left column: form *@
+            <div class="salon-card" style="padding:28px">
+                <h2 style="margin-bottom:20px;font-size:1.15rem">Thông tin đặt lịch</h2>
+
+                @if (isLoggedIn)
+                {
+                    <div class="logged-notice">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                            <polyline points="22,4 12,14.01 9,11.01"/>
+                        </svg>
+                        <span>Bạn đã đăng nhập. Hệ thống dùng thông tin tài khoản của bạn.</span>
+                    </div>
+                }
+
+                <form asp-action="Confirm" method="post" id="bookingForm" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    @* Keep these as hidden inputs so they survive model-binding *@
+                    <input type="hidden" name="ServiceId"   id="ServiceId"      value="@serviceId" />
+                    <input type="hidden" name="StaffId"    id="StaffId"       value="@staffId" />
+                    <input type="hidden" name="AppointmentDate" id="AppointmentDate"
+                           value="@apptDate.ToString("yyyy-MM-ddTHH:mm:ss", System.Globalization.CultureInfo.InvariantCulture)" />
+
+                    @* Show model-state errors *@
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-error" style="margin-bottom:16px">
+                            @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <p style="margin:0">@err.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+
+                    @* Guest info fields *@
+                    @if (!isLoggedIn)
+                    {
+                        <div class="form-group">
+                            <label class="salon-label" for="GuestName">Họ và tên <span class="required">*</span></label>
+                            <input type="text" name="GuestName" id="GuestName" class="salon-form-control"
+                                   value="@Model.GuestName" placeholder="Nguyễn Văn A" required />
+                            <span class="field-error" id="GuestNameError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="salon-label" for="GuestPhone">Số điện thoại <span class="required">*</span></label>
+                            <input type="tel" name="GuestPhone" id="GuestPhone" class="salon-form-control"
+                                   value="@Model.GuestPhone" placeholder="0901234567" required minlength="10" maxlength="15" />
+                            <span class="field-error" id="GuestPhoneError"></span>
+                        </div>
+                        <div class="form-group">
+                            <label class="salon-label" for="GuestEmail">Email</label>
+                            <input type="email" name="GuestEmail" id="GuestEmail" class="salon-form-control"
+                                   value="@Model.GuestEmail" placeholder="email@example.com" />
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        <label class="salon-label" for="Notes">Ghi chú (tuỳ chọn)</label>
+                        <textarea name="Notes" id="Notes" class="salon-form-control"
+                                  rows="3" placeholder="Yêu cầu đặc biệt, dị ứng sản phẩm...">@Model.Notes</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" id="submitBtn">
+                        <span class="btn-text">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:8px">
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                <polyline points="22,4 12,14.01 9,11.01"/>
+                            </svg>
+                            Xác nhận đặt lịch
+                        </span>
+                        <span class="btn-loading" style="display:none">
+                            <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" opacity="0.25"/>
+                                <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            </svg>
+                            Đang xử lý...
+                        </span>
+                    </button>
+                </form>
+            </div>
+
+            @* Right column: booking summary *@
+            <aside class="confirm-summary-box">
+                <h3>Tóm tắt đặt lịch</h3>
+                <div class="summary-line">
+                    <span class="label">Dịch vụ</span>
+                    <span>@serviceName</span>
+                </div>
+                <div class="summary-line">
+                    <span class="label">Stylist</span>
+                    <span>@(string.IsNullOrEmpty(staffName) ? "—" : staffName)</span>
+                </div>
+                <div class="summary-line">
+                    <span class="label">Ngày</span>
+                    <span>@dateDisplay</span>
+                </div>
+                <div class="summary-line">
+                    <span class="label">Giờ</span>
+                    <span>@timeDisplay</span>
+                </div>
+                <div class="summary-line">
+                    <span class="label">Thời lượng</span>
+                    <span>@duration phút</span>
+                </div>
+                <div class="summary-line total">
+                    <span class="label">Tổng cộng</span>
+                    <span class="text-gold">@servicePrice.ToString("N0")đ</span>
+                </div>
+                <p class="text-muted" style="font-size:.85rem;margin-top:16px">
+                    Thanh toán tại salon sau khi sử dụng dịch vụ.
+                </p>
+            </aside>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+    (function() {
+        var form       = document.getElementById('bookingForm');
+        var submitBtn  = document.getElementById('submitBtn');
+        var isLoggedIn = @isLoggedIn.ToString().ToLower();
+
+        if (!form) return;
+
+        // ── Client-side validation for guest bookings ──────────────────
+        function validateGuest() {
+            var hasError = false;
+
+            var guestName    = document.getElementById('GuestName');
+            var guestNameErr = document.getElementById('GuestNameError');
+            if (!guestName || !guestName.value.trim()) {
+                if (guestNameErr) guestNameErr.textContent = 'Vui lòng nhập họ tên';
+                if (guestName) guestName.classList.add('error');
+                hasError = true;
+            } else {
+                if (guestNameErr) guestNameErr.textContent = '';
+                if (guestName) guestName.classList.remove('error');
+            }
+
+            var guestPhone    = document.getElementById('GuestPhone');
+            var guestPhoneErr = document.getElementById('GuestPhoneError');
+            var phoneVal = guestPhone ? guestPhone.value.trim() : '';
+            if (!phoneVal) {
+                if (guestPhoneErr) guestPhoneErr.textContent = 'Vui lòng nhập số điện thoại';
+                if (guestPhone) guestPhone.classList.add('error');
+                hasError = true;
+            } else if (phoneVal.length < 10) {
+                if (guestPhoneErr) guestPhoneErr.textContent = 'Số điện thoại phải có ít nhất 10 số';
+                if (guestPhone) guestPhone.classList.add('error');
+                hasError = true;
+            } else {
+                if (guestPhoneErr) guestPhoneErr.textContent = '';
+                if (guestPhone) guestPhone.classList.remove('error');
+            }
+
+            return !hasError;
+        }
+
+        form.addEventListener('submit', function(e) {
+            // Guard: validate guest fields if not logged in
+            if (!isLoggedIn && !validateGuest()) {
+                e.preventDefault();
+                return;
+            }
+
+            // Show loading state
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                var btnText = submitBtn.querySelector('.btn-text');
+                var btnLoad = submitBtn.querySelector('.btn-loading');
+                if (btnText) btnText.style.display = 'none';
+                if (btnLoad) btnLoad.style.display = 'inline-flex';
+            }
+        });
+
+        // Clear error on input
+        ['GuestName', 'GuestPhone'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', function() {
+                el.classList.remove('error');
+                var errEl = document.getElementById(id + 'Error');
+                if (errEl) errEl.textContent = '';
+            });
+        });
+    })();
+    </script>
+}

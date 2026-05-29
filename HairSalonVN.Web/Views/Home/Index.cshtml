@@ -1,0 +1,793 @@
+@using HairSalonVN.Web.Models.Booking
+@{
+    ViewData["Title"] = "LUXE Hair Salon - Đặt Lịch Làm Tóc Chuyên Nghiệp";
+    var userName = Context.Session.GetString("UserName");
+    var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("AccessToken"));
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+}
+
+<!-- Particle Background Canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- Floating Decorative Elements -->
+<div class="floating-elements">
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+    <div class="floating-shape shape-4"></div>
+</div>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-gradient"></div>
+    <div class="hero-overlay"></div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge" data-aos="fade-down" data-aos-delay="100">
+                <span class="badge-icon"><i class="fas fa-sparkles"></i></span>
+                <span>Ưu đãi 20% cho khách hàng mới</span>
+            </div>
+            
+            @if (isLoggedIn)
+            {
+                <h1 class="hero-title" data-aos="fade-up" data-aos-delay="200">
+                    Chào mừng trở lại, <span class="highlight">@userName</span>
+                </h1>
+                <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="300">
+                    Tiếp tục hành trình làm đẹp của bạn tại LUXE Salon
+                </p>
+                <div class="hero-actions" data-aos="fade-up" data-aos-delay="400">
+                    <a href="/Booking" class="btn-hero btn-primary-hero">
+                        <span>Đặt lịch ngay</span>
+                        <span class="btn-icon"><i class="fas fa-arrow-right"></i></span>
+                    </a>
+                    <a href="/Booking/MyBookings" class="btn-hero btn-secondary-hero">
+                        <span><i class="fas fa-calendar-check"></i></span>
+                        <span>Lịch hẹn của tôi</span>
+                    </a>
+                </div>
+            }
+            else
+            {
+                <h1 class="hero-title" data-aos="fade-up" data-aos-delay="200">
+                    Nơi <span class="highlight">Tóc Đẹp</span> Bắt Đầu
+                </h1>
+                <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="300">
+                    Trải nghiệm dịch vụ làm tóc đẳng cấp 5 sao<br>
+                    với đội ngũ stylist chuyên nghiệp hàng đầu
+                </p>
+                <div class="hero-actions" data-aos="fade-up" data-aos-delay="400">
+                    <a href="/Booking" class="btn-hero btn-primary-hero">
+                        <span>Đặt lịch ngay</span>
+                        <span class="btn-icon"><i class="fas fa-arrow-right"></i></span>
+                    </a>
+                    <a href="/Account/Register" class="btn-hero btn-secondary-hero">
+                        <span><i class="fas fa-user-plus"></i></span>
+                        <span>Tạo tài khoản</span>
+                    </a>
+                </div>
+            }
+
+            <!-- Trust Badges -->
+            <div class="trust-badges" data-aos="fade-up" data-aos-delay="500">
+                <div class="trust-badge">
+                    <span class="trust-icon"><i class="fas fa-shield-halved"></i></span>
+                    <span>100% An Toàn</span>
+                </div>
+                <div class="trust-badge">
+                    <span class="trust-icon"><i class="fas fa-clock"></i></span>
+                    <span>Đặt lịch 24/7</span>
+                </div>
+                <div class="trust-badge">
+                    <span class="trust-icon"><i class="fas fa-tags"></i></span>
+                    <span>Miễn phí hủy</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Visual -->
+        <div class="hero-visual" data-aos="fade-left" data-aos-delay="300">
+            <div class="hero-image-container">
+                <div class="hero-image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&h=1000&fit=crop" alt="LUXE Hair Salon" class="hero-main-image" loading="eager" />
+                    <div class="hero-image-overlay"></div>
+                </div>
+                
+                <!-- Floating Cards -->
+                <div class="hero-float-card float-card-1" data-aos="zoom-in" data-aos-delay="600">
+                    <div class="float-card-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="float-card-content">
+                        <strong>4.9/5</strong>
+                        <span>200+ đánh giá</span>
+                    </div>
+                </div>
+                
+                <div class="hero-float-card float-card-2" data-aos="zoom-in" data-aos-delay="700">
+                    <div class="float-card-icon success">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="float-card-content">
+                        <strong>5000+</strong>
+                        <span>Khách hàng</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" data-aos="fade-up" data-aos-delay="800">
+        <div class="scroll-mouse">
+            <div class="scroll-wheel"></div>
+        </div>
+        <span>Cuộn xuống</span>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="0">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-number" data-count="5000">0</div>
+                <div class="stat-label">Khách hàng tin dùng</div>
+            </div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-icon">
+                    <i class="fas fa-scissors"></i>
+                </div>
+                <div class="stat-number" data-count="15">0</div>
+                <div class="stat-label">Stylist chuyên nghiệp</div>
+            </div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-number" data-count="4.9" data-decimal="true">0</div>
+                <div class="stat-label">Điểm đánh giá trung bình</div>
+            </div>
+            <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+                <div class="stat-number" data-count="8">0</div>
+                <div class="stat-label">Năm kinh nghiệm</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Process Section -->
+<section class="process-section" id="quy-trinh">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">
+                <i class="fas fa-route"></i>
+                Quy trình
+            </span>
+            <h2 class="section-title">Đặt lịch trong <span class="highlight">3 bước đơn giản</span></h2>
+            <p class="section-subtitle">Giao diện trực quan, thao tác dễ dàng - phù hợp mọi lứa tuổi</p>
+        </div>
+        
+        <div class="process-grid">
+            <div class="process-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="process-number">01</div>
+                <div class="process-icon">
+                    <i class="fas fa-cut"></i>
+                </div>
+                <h3>Chọn dịch vụ</h3>
+                <p>Xem bảng giá chi tiết, thời lượng và mô tả từng dịch vụ từ cắt tóc, nhuộm, uốn đến spa cao cấp</p>
+                <div class="process-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <a href="/Booking" class="process-link">Bắt đầu →</a>
+            </div>
+            
+            <div class="process-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="process-number">02</div>
+                <div class="process-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h3>Chọn Stylist & Giờ</h3>
+                <p>Xem profile, chuyên môn và đánh giá của từng stylist. Chọn khung giờ còn trống theo lịch thực tế</p>
+                <div class="process-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+                <a href="/Booking" class="process-link">Chọn ngay →</a>
+            </div>
+            
+            <div class="process-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="process-number">03</div>
+                <div class="process-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Xác nhận đặt lịch</h3>
+                <p>Nhận mã đặt lịch qua email/SMS. Đến salon đúng giờ và tận hưởng dịch vụ tuyệt vời</p>
+                <div class="process-arrow">
+                    <i class="fas fa-check"></i>
+                </div>
+                <a href="/Account/Register" class="process-link">Đăng ký →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section class="services-section" id="services">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">
+                <i class="fas fa-spa"></i>
+                Dịch vụ
+            </span>
+            <h2 class="section-title">Dịch vụ <span class="highlight">nổi bật</span></h2>
+            <p class="section-subtitle">Đa dạng dịch vụ làm đẹp với chất lượng và giá cả hợp lý nhất</p>
+        </div>
+        
+        <div class="services-grid">
+            @if (ViewBag.Services != null)
+            {
+                @foreach (var svc in (IEnumerable<ServiceCardViewModel>)ViewBag.Services)
+                {
+                    <article class="service-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="service-image">
+                            @if (!string.IsNullOrEmpty(svc.ImageUrl))
+                            {
+                                <img src="@svc.ImageUrl" alt="@svc.Name" loading="lazy" />
+                            }
+                            else
+                            {
+                                <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&h=400&fit=crop" alt="@svc.Name" loading="lazy" />
+                            }
+                            <div class="service-overlay">
+                                <a href="/Booking/SelectSlot?serviceId=@svc.Id&date=@DateTime.Today.ToString("yyyy-MM-dd")" class="service-btn">
+                                    <i class="fas fa-calendar-plus"></i>
+                                    Đặt lịch ngay
+                                </a>
+                            </div>
+                        </div>
+                        <div class="service-content">
+                            <div class="service-meta">
+                                <span class="service-duration">
+                                    <i class="fas fa-clock"></i>
+                                    @svc.DurationDisplay
+                                </span>
+                                <span class="service-price">@svc.PriceDisplay</span>
+                            </div>
+                            <h3>@svc.Name</h3>
+                            <p>@svc.Description</p>
+                            <div class="service-footer">
+                                <a href="/Booking/SelectSlot?serviceId=@svc.Id&date=@DateTime.Today.ToString("yyyy-MM-dd")" class="service-book-btn">
+                                    <span>Đặt lịch</span>
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            }
+            else
+            {
+                <article class="service-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="service-image">
+                        <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600&h=400&fit=crop" alt="Cắt tóc nam" loading="lazy" />
+                        <div class="service-badge">Hot</div>
+                        <div class="service-overlay">
+                            <a href="/Booking" class="service-btn"><i class="fas fa-calendar-plus"></i> Đặt lịch ngay</a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <div class="service-meta">
+                            <span class="service-duration"><i class="fas fa-clock"></i> 45 phút</span>
+                            <span class="service-price">120.000đ</span>
+                        </div>
+                        <h3>Cắt Tóc Nam</h3>
+                        <p>Cắt kiểu, gội sấy hoàn chỉnh với sản phẩm chăm sóc tóc cao cấp</p>
+                        <div class="service-footer">
+                            <a href="/Booking" class="service-book-btn"><span>Đặt lịch</span><i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="service-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-image">
+                        <img src="https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&h=400&fit=crop" alt="Uốn tóc" loading="lazy" />
+                        <div class="service-badge featured">Yêu thích</div>
+                        <div class="service-overlay">
+                            <a href="/Booking" class="service-btn"><i class="fas fa-calendar-plus"></i> Đặt lịch ngay</a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <div class="service-meta">
+                            <span class="service-duration"><i class="fas fa-clock"></i> 180 phút</span>
+                            <span class="service-price">450.000đ</span>
+                        </div>
+                        <h3>Uốn Tóc Xoăn</h3>
+                        <p>Uốn, duỗi chuyên nghiệp với công nghệ hiện đại, không hư tổn tóc</p>
+                        <div class="service-footer">
+                            <a href="/Booking" class="service-book-btn"><span>Đặt lịch</span><i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="service-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="service-image">
+                        <img src="https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?w=600&h=400&fit=crop" alt="Gội đầu" loading="lazy" />
+                        <div class="service-overlay">
+                            <a href="/Booking" class="service-btn"><i class="fas fa-calendar-plus"></i> Đặt lịch ngay</a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <div class="service-meta">
+                            <span class="service-duration"><i class="fas fa-clock"></i> 30 phút</span>
+                            <span class="service-price">80.000đ</span>
+                        </div>
+                        <h3>Gội Đầu Massage</h3>
+                        <p>Thư giãn với tinh dầu thiên nhiên và massage da đầu chuyên sâu</p>
+                        <div class="service-footer">
+                            <a href="/Booking" class="service-book-btn"><span>Đặt lịch</span><i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="service-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="service-image">
+                        <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&h=400&fit=crop" alt="Nhuộm tóc" loading="lazy" />
+                        <div class="service-badge">Mới</div>
+                        <div class="service-overlay">
+                            <a href="/Booking" class="service-btn"><i class="fas fa-calendar-plus"></i> Đặt lịch ngay</a>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <div class="service-meta">
+                            <span class="service-duration"><i class="fas fa-clock"></i> 150 phút</span>
+                            <span class="service-price">350.000đ</span>
+                        </div>
+                        <h3>Nhuộm Tóc</h3>
+                        <p>Technique nhuộm hiện đại, màu sắc bền đẹp, an toàn cho tóc</p>
+                        <div class="service-footer">
+                            <a href="/Booking" class="service-book-btn"><span>Đặt lịch</span><i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+        
+        <div class="services-cta" data-aos="fade-up">
+            <a href="/Booking" class="btn-services-cta">
+                <span>Xem tất cả dịch vụ</span>
+                <i class="fas fa-th-large"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="features-bg"></div>
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge light">
+                <i class="fas fa-gem"></i>
+                Tại sao chọn LUXE
+            </span>
+            <h2 class="section-title light">Vì sao <span class="highlight-light">2000+ khách</span> tin tưởng chúng tôi</h2>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="fas fa-award"></i>
+                </div>
+                <h3>Stylist 5 Sao</h3>
+                <p>Đội ngũ stylist được đào tạo bài bản, có chứng chỉ quốc tế và kinh nghiệm nhiều năm</p>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3>Sản Phẩm Cao Cấp</h3>
+                <p>Sử dụng 100% sản phẩm organic, nhập khẩu chính hãng từ các thương hiệu nổi tiếng</p>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <h3>Bảo Hành Dịch Vụ</h3>
+                <p>Chế độ bảo hành 7 ngày cho tất cả dịch vụ. Không hài lòng hoàn tiền 100%</p>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-icon">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                </div>
+                <h3>Công Nghệ Hiện Đại</h3>
+                <p>Trang thiết bị tiên tiến, cập nhật xu hướng và công nghệ làm đẹp mới nhất</p>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Đúng Giờ</h3>
+                <p>Cam kết phục vụ đúng giờ. Trễ hơn 15 phút được giảm 10% giá dịch vụ</p>
+            </div>
+            
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                <div class="feature-icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <h3>Ưu Đãi Hấp Dẫn</h3>
+                <p>Thẻ thành viên với nhiều ưu đãi, tích điểm đổi quà và khuyến mãi mỗi tháng</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Reviews Section -->
+<section class="reviews-section" id="danh-gia">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">
+                <i class="fas fa-heart"></i>
+                Đánh giá
+            </span>
+            <h2 class="section-title">Khách hàng <span class="highlight">nói gì về chúng tôi</span></h2>
+            <p class="section-subtitle">Phản hồi thực tế từ những khách hàng đã trải nghiệm dịch vụ</p>
+        </div>
+        
+        <div class="reviews-grid">
+            @if (ViewBag.Reviews != null && ((IEnumerable<ReviewViewModel>)ViewBag.Reviews).Any())
+            {
+                @foreach (var r in (IEnumerable<ReviewViewModel>)ViewBag.Reviews)
+                {
+                    <article class="review-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="review-stars">
+                            @for (int i = 0; i < (int)r.Rating; i++)
+                            {
+                                <i class="fas fa-star"></i>
+                            }
+                        </div>
+                        <blockquote class="review-text">"@r.Comment"</blockquote>
+                        <div class="review-author">
+                            <div class="review-avatar">
+                                @(string.IsNullOrEmpty(r.CustomerName) ? "?" : r.CustomerName[0])
+                            </div>
+                            <div class="review-info">
+                                <strong>@r.CustomerName</strong>
+                                <span>@r.ServiceName</span>
+                            </div>
+                        </div>
+                    </article>
+                }
+            }
+            else
+            {
+                <article class="review-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <blockquote class="review-text">"Stylist Minh rất tận tâm, lắng nghe ý kiến khách hàng. Tóc làm đúng như mong muốn. Chắc chắn sẽ quay lại lần sau!"</blockquote>
+                    <div class="review-author">
+                        <div class="review-avatar">N</div>
+                        <div class="review-info">
+                            <strong>Nguyễn Minh Nhật</strong>
+                            <span>Cắt tóc nam + Gội đầu</span>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="review-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <blockquote class="review-text">"Đặt lịch online qua app cực kỳ tiện lợi, không phải chờ đợi lâu. Không gian salon sang trọng, nhân viên niềm nở."</blockquote>
+                    <div class="review-author">
+                        <div class="review-avatar">T</div>
+                        <div class="review-info">
+                            <strong>Trần Thị Lan</strong>
+                            <span>Uốn tóc nữ</span>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="review-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <blockquote class="review-text">"Giá cả hợp lý, dịch vụ gội massage rất thư giãn. Tinh dầu thiên nhiên thơm dịu, da đầu thoải mái hẳn."</blockquote>
+                    <div class="review-author">
+                        <div class="review-avatar">P</div>
+                        <div class="review-info">
+                            <strong>Phạm Văn Tùng</strong>
+                            <span>Gội đầu massage</span>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="review-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="review-stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <blockquote class="review-text">"Nhuộm tóc ở đây lần đầu và rất ấn tượng. Màu nhuộm đều, bóng mượt. Stylist tư vấn màu rất chuẩn với tone da của mình."</blockquote>
+                    <div class="review-author">
+                        <div class="review-avatar">H</div>
+                        <div class="review-info">
+                            <strong>Hoàng Thu Hà</strong>
+                            <span>Nhuộm tóc balayage</span>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="gallery-section">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">
+                <i class="fas fa-images"></i>
+                Bộ sưu tập
+            </span>
+            <h2 class="section-title">Khoảnh khắc <span class="highlight">LUXE</span></h2>
+        </div>
+        
+        <div class="gallery-grid">
+            <div class="gallery-item large" data-aos="fade-up" data-aos-delay="100">
+                <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=600&fit=crop" alt="Salon Interior" />
+                <div class="gallery-overlay">
+                    <span><i class="fas fa-expand"></i></span>
+                </div>
+            </div>
+            <div class="gallery-item" data-aos="fade-up" data-aos-delay="200">
+                <img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&h=400&fit=crop" alt="Hair Styling" />
+                <div class="gallery-overlay">
+                    <span><i class="fas fa-expand"></i></span>
+                </div>
+            </div>
+            <div class="gallery-item" data-aos="fade-up" data-aos-delay="300">
+                <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=400&fit=crop" alt="Salon Service" />
+                <div class="gallery-overlay">
+                    <span><i class="fas fa-expand"></i></span>
+                </div>
+            </div>
+            <div class="gallery-item" data-aos="fade-up" data-aos-delay="400">
+                <img src="https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?w=400&h=400&fit=crop" alt="Hair Treatment" />
+                <div class="gallery-overlay">
+                    <span><i class="fas fa-expand"></i></span>
+                </div>
+            </div>
+            <div class="gallery-item large" data-aos="fade-up" data-aos-delay="500">
+                <img src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800&h=600&fit=crop" alt="Hair Coloring" />
+                <div class="gallery-overlay">
+                    <span><i class="fas fa-expand"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-particles" id="cta-particles"></div>
+    <div class="container">
+        <div class="cta-content" data-aos="zoom-in">
+            <div class="cta-badge">
+                <i class="fas fa-sparkles"></i>
+                Ưu đãi đặc biệt
+            </div>
+            <h2>Sẵn sàng thay đổi <span class="highlight-cta">diện mạo</span> của bạn?</h2>
+            <p>Đặt lịch ngay hôm nay và nhận ưu đãi <strong>giảm 20%</strong> cho khách hàng mới. Miễn phí hủy hoặc đổi lịch mọi lúc.</p>
+            
+            <div class="cta-actions">
+                <a href="/Booking" class="btn-cta-primary">
+                    <span><i class="fas fa-calendar-check"></i></span>
+                    <span>Đặt lịch ngay</span>
+                </a>
+                @if (!isLoggedIn)
+                {
+                    <a href="/Account/Login" class="btn-cta-secondary">
+                        <span><i class="fas fa-user"></i></span>
+                        <span>Đăng nhập</span>
+                    </a>
+                }
+            </div>
+            
+            <div class="cta-trust">
+                <span><i class="fas fa-check-circle"></i> Miễn phí hủy</span>
+                <span><i class="fas fa-check-circle"></i> Không cần thẻ</span>
+                <span><i class="fas fa-check-circle"></i> Xác nhận ngay</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS (Animate on Scroll)
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 50,
+            disable: window.innerWidth < 768
+        });
+
+        // Particle Background Animation
+        class ParticleAnimation {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                if (!this.canvas) return;
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.resize();
+                this.init();
+                this.animate();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            init() {
+                const particleCount = Math.min(80, Math.floor(window.innerWidth / 20));
+                for (let i = 0; i < particleCount; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        radius: Math.random() * 2 + 1,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        alpha: Math.random() * 0.5 + 0.1,
+                        color: Math.random() > 0.5 ? '232, 176, 75' : '99, 102, 241'
+                    });
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    
+                    if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    this.ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+                    this.ctx.fill();
+                });
+                
+                // Draw connections
+                this.particles.forEach((p1, i) => {
+                    this.particles.slice(i + 1).forEach(p2 => {
+                        const dx = p1.x - p2.x;
+                        const dy = p1.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (dist < 120) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(p1.x, p1.y);
+                            this.ctx.lineTo(p2.x, p2.y);
+                            this.ctx.strokeStyle = `rgba(232, 176, 75, ${0.1 * (1 - dist / 120)})`;
+                            this.ctx.stroke();
+                        }
+                    });
+                });
+                
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // Initialize particle animation
+        new ParticleAnimation('particle-canvas');
+
+        // Counter Animation
+        function animateCounter(el) {
+            const target = parseFloat(el.dataset.count);
+            const isDecimal = el.dataset.decimal === 'true';
+            const duration = 2000;
+            const start = performance.now();
+            
+            function update(now) {
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = target * eased;
+                
+                el.textContent = isDecimal ? current.toFixed(1) : Math.floor(current).toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+
+        // Intersection Observer for counter animation
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    counterObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.stat-number').forEach(el => {
+            counterObserver.observe(el);
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        const navbar = document.querySelector('.salon-nav');
+        let lastScroll = 0;
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // Parallax effect for hero section
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroVisual = document.querySelector('.hero-visual');
+            if (heroVisual && scrolled < window.innerHeight) {
+                heroVisual.style.transform = `translateY(${scrolled * 0.1}px)`;
+            }
+        });
+    </script>
+}

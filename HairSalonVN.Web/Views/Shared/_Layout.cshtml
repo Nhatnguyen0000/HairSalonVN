@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="LUXE Hair Salon - Hệ thống đặt lịch salon tóc trực tuyến. Đặt lịch nhanh với stylist chuyên nghiệp." />
+    <title>@ViewData["Title"] – LUXE Hair Salon</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    
+    <link rel="stylesheet" href="~/css/salon.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="@(Context.Request.Path == "/" ? "page-home" : "") @(ViewData["BodyClass"])">
+
+    <nav class="salon-nav" id="mainNav">
+        <div class="nav-container">
+            <a href="/" class="brand brand-title">LUXE<span class="brand-accent">Hair</span></a>
+
+            <div class="nav-links" id="navLinks">
+                @{
+                    var role = Context.Session.GetString("UserRole");
+                    var token = Context.Session.GetString("AccessToken");
+                }
+
+                <a href="/" class="@(Context.Request.Path == "/" ? "active" : "")">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+                    Trang chủ
+                </a>
+                <a href="/Booking" class="@(Context.Request.Path.StartsWithSegments("/Booking") && Context.Request.Path != "/Booking/MyBookings" ? "active" : "")">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Đặt lịch
+                </a>
+                @if (role != "Staff")
+                {
+                    <a href="/Booking/MyBookings" class="@(Context.Request.Path == "/Booking/MyBookings" ? "active" : "")">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                        Lịch của tôi
+                    </a>
+                }
+
+                @if (role == "Admin")
+                {
+                    <a href="/Admin" class="@(Context.Request.Path.StartsWithSegments("/Admin") ? "active" : "")">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.6 1.65 1.65 0 0010.51 3H12a2 2 0 012 2v.09a1.65 1.65 0 001.51 1 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9c0 .67.26 1.31.73 1.77A1.65 1.65 0 0017.49 12H19a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                        Quản trị
+                    </a>
+                }
+                @if (role == "Staff")
+                {
+                    <a href="/Staff" class="@(Context.Request.Path.StartsWithSegments("/Staff") ? "active" : "")">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                        Ca làm việc
+                    </a>
+                }
+
+                <div class="nav-divider"></div>
+
+                @if (string.IsNullOrEmpty(token))
+                {
+                    <a href="/Account/Login" class="btn btn-ghost btn-sm">Đăng nhập</a>
+                    <a href="/Account/Register" class="btn btn-primary btn-sm">Đăng ký</a>
+                }
+                else
+                {
+                    var userName = Context.Session.GetString("UserName") ?? "";
+                    <a href="@(role == "Staff" ? "/Staff/Profile" : "/Account/Profile")" class="@(Context.Request.Path.Value?.Contains("Profile") == true ? "active" : "")" title="Hồ sơ">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Hồ sơ
+                    </a>
+                    <div class="nav-user">
+                        <div class="nav-user-avatar">@(string.IsNullOrEmpty(userName) ? '?' : userName[0])</div>
+                        <span>@userName</span>
+                    </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="nav-logout-form">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-ghost btn-sm">Đăng xuất</button>
+                    </form>
+                }
+            </div>
+
+            <button class="nav-hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-menu-overlay" id="mobileOverlay"></div>
+
+    @if (TempData["Success"] != null || TempData["Error"] != null)
+    {
+        <div class="global-alerts">
+            @if (TempData["Success"] != null)
+            {
+                <div class="salon-alert salon-alert-success fade-up" role="alert">@TempData["Success"]</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="salon-alert salon-alert-error fade-up" role="alert">@TempData["Error"]</div>
+            }
+        </div>
+    }
+
+    <main id="main-content">
+        @RenderBody()
+    </main>
+
+    <button class="back-to-top" id="backToTop" aria-label="Cuộn lên đầu trang">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18,15 12,9 6,15"/></svg>
+    </button>
+
+    <footer class="salon-footer">
+        <div class="footer-particles"></div>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="brand brand-title">LUXE<span class="brand-accent">Hair</span></div>
+                    <p>Hệ thống đặt lịch và quản lý salon tóc LUXE — trải nghiệm làm đẹp hiện đại, tiện lợi.</p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Dịch vụ</h4>
+                    <a href="/Booking">Đặt lịch ngay</a>
+                    <a href="/Booking/MyBookings">Lịch của tôi</a>
+                    <a href="/#services">Bảng giá</a>
+                    <a href="/#quy-trinh">Quy trình</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Hỗ trợ</h4>
+                    <a href="#">Câu hỏi thường gặp</a>
+                    <a href="#">Chính sách hủy lịch</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Chính sách bảo mật</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Liên hệ</h4>
+                    <a href="tel:0901234567"><i class="fas fa-phone"></i> 0901 234 567</a>
+                    <a href="mailto:contact@luxehair.vn"><i class="fas fa-envelope"></i> contact@luxehair.vn</a>
+                    <a href="#"><i class="fas fa-map-marker-alt"></i> 123 Nguyễn Huệ, Q.1, TP.HCM</a>
+                    <a href="#"><i class="fas fa-clock"></i> 8:00 - 21:00 (Thứ 2 - CN)</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; @DateTime.Now.Year LUXE Hair Salon — Dự án học tập ADO.NET</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/salon.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

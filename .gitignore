@@ -1,0 +1,47 @@
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Bb]in/
+[Oo]bj/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+*.swp
+*.swo
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*.*
+!**/[Pp]ackages/build/
+
+# Dotnet
+*.dll
+*.exe
+*.pdb
+*.mdb
+*.log
+*.cache
+
+# Sensitive files
+appsettings.*.json
+*.env
+*.local.json
+connectionstrings.json
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/

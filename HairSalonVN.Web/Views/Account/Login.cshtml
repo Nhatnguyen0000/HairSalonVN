@@ -1,0 +1,90 @@
+@using HairSalonVN.Web.Models.Auth
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Đăng nhập – LUXE Hair Salon</title>
+    <link rel="stylesheet" href="~/css/salon.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-card scale-in">
+            <div class="auth-header">
+                <div class="auth-logo brand-title">LUXE<span class="gold">Hair</span></div>
+                <p class="auth-sub">Chào mừng bạn quay trở lại</p>
+            </div>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="salon-alert salon-alert-error">@Html.ValidationSummary(true, "", new { @class = "mb-0" })</div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="salon-alert salon-alert-error">@TempData["Error"]</div>
+            }
+            <form asp-action="Login" method="post" class="auth-form" id="loginForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                <div class="form-group">
+                    <label asp-for="Email" class="salon-label">Email</label>
+                    <input asp-for="Email" id="loginEmail" class="salon-form-control" placeholder="email@example.com" autocomplete="email" />
+                    <span asp-validation-for="Email" class="invalid-feedback"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Password" class="salon-label">Mật khẩu</label>
+                    <input asp-for="Password" id="loginPassword" type="password" class="salon-form-control" placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="invalid-feedback"></span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">Đăng nhập</button>
+            </form>
+
+            <div class="demo-accounts">
+                <h3>Tài khoản demo — bấm để điền</h3>
+                <div class="demo-grid">
+                    <a href="#" class="demo-card admin" data-email="admin@luxehair.vn" data-password="Admin@123">
+                        <div class="role">Quản trị (Admin)</div>
+                        <div class="name">Admin — Trần Văn Quản</div>
+                        <div class="cred">admin@luxehair.vn · Admin@123</div>
+                    </a>
+                    <a href="#" class="demo-card staff" data-email="tai.nguyen@luxehair.vn" data-password="Staff@123">
+                        <div class="role">Stylist 1</div>
+                        <div class="name">Stylist — Nguyễn Minh Tài</div>
+                        <div class="cred">tai.nguyen@luxehair.vn · Staff@123</div>
+                    </a>
+                    <a href="#" class="demo-card staff" data-email="huong.le@luxehair.vn" data-password="Staff@123">
+                        <div class="role">Stylist 2</div>
+                        <div class="name">Stylist — Lê Thị Hương</div>
+                        <div class="cred">huong.le@luxehair.vn · Staff@123</div>
+                    </a>
+                    <a href="#" class="demo-card customer" data-email="mai.pham@gmail.com" data-password="Customer@123">
+                        <div class="role">Khách hàng</div>
+                        <div class="name">Khách hàng — Phạm Thị Mai</div>
+                        <div class="cred">mai.pham@gmail.com · Customer@123</div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="auth-divider">hoặc</div>
+            <p class="auth-link">Chưa có tài khoản? <a href="/Account/Register">Đăng ký miễn phí</a></p>
+            <div class="auth-back"><a href="/" class="btn btn-ghost btn-sm">← Về trang chủ</a></div>
+        </div>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        document.querySelectorAll('.demo-card').forEach(card => {
+            card.addEventListener('click', e => {
+                e.preventDefault();
+                document.getElementById('loginEmail').value = card.dataset.email;
+                document.getElementById('loginPassword').value = card.dataset.password;
+            });
+        });
+    </script>
+</body>
+</html>

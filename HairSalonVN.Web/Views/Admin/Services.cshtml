@@ -1,0 +1,358 @@
+﻿@using System.Web
+@using HairSalonVN.Web.Models.Service
+@model IEnumerable<ServiceCardViewModel>
+@{
+    ViewData["Title"] = "Quản lý dịch vụ";
+    ViewBag.DashboardRole = "Admin";
+    ViewBag.ActiveMenu = "services";
+    var services = Model?.ToList() ?? new List<ServiceCardViewModel>();
+}
+
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Quản lý dịch vụ</h1>
+        <p class="luxe-date">Thêm, sửa, xóa dịch vụ salon</p>
+    </div>
+</div>
+
+<div class="luxe-content">
+
+<div class="luxe-panel">
+    <div class="luxe-panel-head"><h2>Thêm dịch vụ mới</h2></div>
+    <div class="luxe-panel-body">
+    <form id="addServiceForm" class="service-form-modern">
+        @Html.AntiForgeryToken()
+        <div class="form-grid">
+            <div class="form-group-modern">
+                <label class="salon-label">Tên dịch vụ</label>
+                <input type="text" name="Name" class="modern-input" placeholder="VD: Cắt tóc nam" required />
+            </div>
+            <div class="form-group-modern">
+                <label class="salon-label">Giá (VNĐ)</label>
+                <div class="input-with-prefix">
+                    <input type="number" name="Price" class="modern-input" placeholder="VD: 120000" min="0" required />
+                    <span class="input-prefix">VNĐ</span>
+                </div>
+            </div>
+        </div>
+        <div class="form-grid">
+            <div class="form-group-modern">
+                <label class="salon-label">Thời gian (phút)</label>
+                <div class="input-with-suffix">
+                    <input type="number" name="DurationMinutes" class="modern-input" placeholder="45" min="1" required />
+                    <span class="input-suffix">phút</span>
+                </div>
+            </div>
+            <div class="form-group-modern form-group-full">
+                <label class="salon-label">Mô tả</label>
+                <textarea name="Description" class="modern-input modern-textarea" rows="2" placeholder="Mô tả chi tiết về dịch vụ..."></textarea>
+            </div>
+        </div>
+        <div class="form-submit">
+            <button type="submit" class="luxe-btn" id="addServiceBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>Thêm Dịch Vụ</span>
+            </button>
+        </div>
+    </form>
+    </div>
+</div>
+
+<div class="luxe-panel">
+    <div class="luxe-panel-head">
+        <h2>Danh sách dịch vụ (@services.Count)</h2>
+        <div class="luxe-search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" id="searchServices" placeholder="Tìm kiếm..." />
+        </div>
+    </div>
+    <div class="luxe-panel-body">
+    @if (!services.Any())
+    {
+        <div class="luxe-empty">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M6 3L3 6v15a2 2 0 002 2h14a2 2 0 002-2V6l-3-3z"/>
+                <path d="M3 6h18"/>
+                <path d="M16 10a4 4 0 01-8 0"/>
+            </svg>
+            <p>Chưa có dịch vụ nào</p>
+            <small>Thêm dịch vụ đầu tiên bên trên</small>
+        </div>
+    }
+    else
+    {
+        <div class="services-grid" id="servicesGrid">
+            @foreach (var svc in services)
+            {
+                <div class="service-card" data-id="@svc.Id" data-name="@svc.Name.ToLower()">
+                    <div class="service-card-header">
+                        <div class="service-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 3L3 6v15a2 2 0 002 2h14a2 2 0 002-2V6l-3-3z"/>
+                                <path d="M3 6h18"/>
+                            </svg>
+                        </div>
+                        <div class="service-status @(svc.IsActive ? "status-active" : "status-inactive")">
+                            <span class="status-dot"></span>
+                            @(svc.IsActive ? "Hoạt động" : "Ngừng")
+                        </div>
+                    </div>
+                    <div class="service-card-body">
+                        <h4 class="service-title">@svc.Name</h4>
+                        <p class="service-description">@(string.IsNullOrEmpty(svc.Description) ? "Không có mô tả" : svc.Description)</p>
+                        <div class="service-meta">
+                            <div class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"/>
+                                    <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                                </svg>
+                                @svc.PriceDisplay
+                            </div>
+                            <div class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12,6 12,12 16,14"/>
+                                </svg>
+                                @svc.DurationDisplay
+                            </div>
+                        </div>
+                    </div>
+                    <div class="service-card-footer">
+                        <button type="button" class="luxe-btn luxe-btn-outline luxe-btn-sm"
+                                onclick="openEditModal('@svc.Id', '@Html.Raw(HttpUtility.JavaScriptStringEncode(svc.Name))', '@Html.Raw(HttpUtility.JavaScriptStringEncode(svc.Description ?? ""))', @svc.Price, @svc.DurationMinutes, @svc.IsActive.ToString().ToLower())">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Sửa
+                        </button>
+                        <button type="button" class="luxe-btn-sm cancel" onclick="confirmDeleteService('@svc.Id', '@Html.Raw(HttpUtility.JavaScriptStringEncode(svc.Name))')">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3,6 5,6 21,6"/>
+                                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            </svg>
+                            Xóa
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    </div>
+</div>
+
+</div>
+
+<!-- Edit Modal -->
+<div class="luxe-modal" id="editModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Chỉnh sửa dịch vụ</h3>
+            <button type="button" class="modal-close" onclick="closeEditModal()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <form id="editServiceForm" class="modal-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" id="editId" />
+            <div class="form-grid">
+                <div class="form-group-modern">
+                    <label class="salon-label">Tên dịch vụ</label>
+                    <input type="text" name="Name" id="editName" class="modern-input" required />
+                </div>
+                <div class="form-group-modern">
+                    <label class="salon-label">Giá (VNĐ)</label>
+                    <input type="number" name="Price" id="editPrice" class="modern-input" min="0" required />
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group-modern">
+                    <label class="salon-label">Thời gian (phút)</label>
+                    <input type="number" name="DurationMinutes" id="editDuration" class="modern-input" min="1" required />
+                </div>
+                <div class="form-group-modern">
+                    <label class="salon-label">
+                        <input type="checkbox" name="IsActive" id="editIsActive" class="checkbox-custom" />
+                        Dịch vụ hoạt động
+                    </label>
+                </div>
+            </div>
+            <div class="form-group-modern">
+                <label class="salon-label">Mô tả</label>
+                <textarea name="Description" id="editDescription" class="modern-input modern-textarea" rows="2"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="luxe-btn luxe-btn-outline" onclick="closeEditModal()">Hủy</button>
+                <button type="submit" class="luxe-btn" id="editSubmitBtn">
+                    <span>Lưu thay đổi</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="luxe-modal" id="confirmModal">
+    <div class="modal-content" style="max-width:420px;">
+        <div class="modal-header">
+            <h3 id="confirmTitle">Xác nhận</h3>
+            <button type="button" class="modal-close" onclick="closeConfirm()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-form">
+            <p id="confirmMessage" style="color:var(--luxe-text-secondary);margin:0 0 24px;font-size:.95rem;line-height:1.5;"></p>
+            <div class="modal-actions">
+                <button type="button" class="luxe-btn luxe-btn-outline" onclick="closeConfirm()">Hủy</button>
+                <button type="button" class="luxe-btn" id="confirmBtn" style="background:#c45050;color:#fff;border-color:#c45050;">
+                    <span>Xác nhận</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function() {
+    var editModal = document.getElementById('editModal');
+    var confirmModal = document.getElementById('confirmModal');
+    var confirmCallback = null;
+
+    window.openEditModal = function(id, name, description, price, duration, isActive) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editName').value = name || '';
+        document.getElementById('editDescription').value = description || '';
+        document.getElementById('editPrice').value = price;
+        document.getElementById('editDuration').value = duration;
+        document.getElementById('editIsActive').checked = isActive;
+        editModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeEditModal = function() {
+        editModal.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    window.confirmDeleteService = function(id, name) {
+        document.getElementById('confirmTitle').textContent = 'Xóa dịch vụ';
+        document.getElementById('confirmMessage').textContent = 'Bạn có chắc muốn xóa dịch vụ "' + (name || '') + '"? Hành động này không thể hoàn tác.';
+        confirmCallback = function() {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Admin/DeleteService';
+            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            form.innerHTML = '@Html.AntiForgeryToken()'.replace('type="hidden"', 'type="hidden"').replace('value=""', 'value="' + token + '"');
+            var idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = 'id';
+            idInput.value = id;
+            form.appendChild(idInput);
+            document.body.appendChild(form);
+            form.submit();
+        };
+        confirmModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeConfirm = function() {
+        confirmModal.classList.remove('active');
+        document.body.style.overflow = '';
+        confirmCallback = null;
+    };
+
+    document.getElementById('confirmBtn').onclick = function() {
+        if (confirmCallback) {
+            var span = this.querySelector('span');
+            span.textContent = 'Đang xử lý...';
+            this.disabled = true;
+            confirmCallback();
+        }
+    };
+
+    editModal.addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+    confirmModal.addEventListener('click', function(e) {
+        if (e.target === this) closeConfirm();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (editModal.classList.contains('active')) closeEditModal();
+            if (confirmModal.classList.contains('active')) closeConfirm();
+        }
+    });
+
+    // Add service
+    document.getElementById('addServiceForm').onsubmit = function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('addServiceBtn');
+        var formData = new FormData(this);
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Đang xử lý...';
+        fetch('/Admin/AddService', { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(resp) {
+                if (resp.success) {
+                    showToast(resp.message || 'Thêm dịch vụ thành công!', 'success');
+                    setTimeout(function() { location.reload(); }, 800);
+                } else {
+                    showToast(resp.message || 'Có lỗi xảy ra', 'error');
+                    btn.disabled = false;
+                    btn.querySelector('span').textContent = 'Thêm Dịch Vụ';
+                }
+            })
+            .catch(function() {
+                showToast('Không thể kết nối máy chủ', 'error');
+                btn.disabled = false;
+                btn.querySelector('span').textContent = 'Thêm Dịch Vụ';
+            });
+    };
+
+    // Edit service
+    document.getElementById('editServiceForm').onsubmit = function(e) {
+        e.preventDefault();
+        var btn = document.getElementById('editSubmitBtn');
+        var formData = new FormData(this);
+        formData.set('IsActive', document.getElementById('editIsActive').checked ? 'true' : 'false');
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Đang xử lý...';
+        fetch('/Admin/UpdateService', { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(resp) {
+                if (resp.success) {
+                    showToast(resp.message || 'Cập nhật thành công!', 'success');
+                    setTimeout(function() { location.reload(); }, 800);
+                } else {
+                    showToast(resp.message || 'Có lỗi xảy ra', 'error');
+                    btn.disabled = false;
+                    btn.querySelector('span').textContent = 'Lưu thay đổi';
+                }
+            })
+            .catch(function() {
+                showToast('Không thể kết nối máy chủ', 'error');
+                btn.disabled = false;
+                btn.querySelector('span').textContent = 'Lưu thay đổi';
+            });
+    };
+
+    // Search
+    document.getElementById('searchServices').oninput = function(e) {
+        var term = e.target.value.toLowerCase();
+        document.querySelectorAll('.service-card').forEach(function(card) {
+            card.style.display = card.dataset.name.includes(term) ? '' : 'none';
+        });
+    };
+})();
+</script>
+}

@@ -1,0 +1,133 @@
+@using HairSalonVN.Web.Models.Admin
+@model ReportsViewModel
+@{
+    ViewData["Title"] = "Báo cáo";
+    ViewBag.DashboardRole = "Admin";
+    ViewBag.ActiveMenu = "reports";
+}
+
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Báo cáo thống kê</h1>
+        <p class="luxe-date">Tổng hợp doanh thu và hiệu suất salon</p>
+    </div>
+</div>
+
+<div class="luxe-content">
+    <div class="luxe-stats">
+        <div class="stat-card stat-card-gold">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.RevenueThisMonth.ToString("N0")đ</span>
+                <span class="stat-text">Doanh thu tháng này</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-success">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.CompletedThisMonth</span>
+                <span class="stat-text">Hoàn thành tháng này</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-primary">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.AppointmentsThisMonth</span>
+                <span class="stat-text">Lịch hẹn tháng này</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-warning">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.TotalCustomers</span>
+                <span class="stat-text">Khách hàng (ước tính)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="luxe-grid-2">
+        <div class="luxe-panel">
+            <div class="luxe-panel-head"><h2>Top dịch vụ</h2></div>
+            <div class="luxe-panel-body">
+                @if (!Model.TopServices.Any())
+                {
+                    <div class="luxe-empty"><p>Chưa có dữ liệu</p></div>
+                }
+                else
+                {
+                    <div class="luxe-table-wrap">
+                        <table class="luxe-table">
+                            <thead><tr><th>Dịch vụ</th><th>Số lượt</th><th>Doanh thu</th></tr></thead>
+                            <tbody>
+                                @foreach (var s in Model.TopServices)
+                                {
+                                    <tr>
+                                        <td>@s.Name</td>
+                                        <td>@s.Count</td>
+                                        <td>@s.Revenue.ToString("N0")đ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="luxe-panel">
+            <div class="luxe-panel-head"><h2>Top stylist</h2></div>
+            <div class="luxe-panel-body">
+                @if (!Model.TopStaff.Any())
+                {
+                    <div class="luxe-empty"><p>Chưa có dữ liệu</p></div>
+                }
+                else
+                {
+                    <div class="luxe-table-wrap">
+                        <table class="luxe-table">
+                            <thead><tr><th>Stylist</th><th>Hoàn thành</th></tr></thead>
+                            <tbody>
+                                @foreach (var s in Model.TopStaff)
+                                {
+                                    <tr>
+                                        <td>@s.Name</td>
+                                        <td>@s.CompletedCount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="luxe-panel" style="margin-top:24px;">
+        <div class="luxe-panel-head"><h2>Tổng quan</h2></div>
+        <div class="luxe-panel-body">
+            <p style="margin:0;color:var(--luxe-text-secondary);">
+                Doanh thu tích lũy: <strong style="color:var(--luxe-gold);">@Model.RevenueAllTime.ToString("N0")đ</strong> ·
+                Đã hủy tháng này: <strong>@Model.CancelledThisMonth</strong> lịch
+            </p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+@using HairSalonVN.Web.Models.Booking
+@model IEnumerable<ServiceCardViewModel>
+@{
+    ViewData["Title"] = "Đặt lịch";
+    ViewData["BodyClass"] = "page-booking";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<div class="page-hero">
+    <div class="container">
+        <h1>Đặt lịch dịch vụ</h1>
+        <p class="lead">Chọn dịch vụ phù hợp — bước đầu tiên trong quy trình 3 bước</p>
+        <div class="booking-steps">
+            <span class="booking-step active"><span class="num">1</span> Chọn dịch vụ</span>
+            <span class="booking-step"><span class="num">2</span> Stylist & giờ</span>
+            <span class="booking-step"><span class="num">3</span> Xác nhận</span>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty-box">
+                <h3>Chưa có dịch vụ nào</h3>
+                <p class="text-muted">Vui lòng quay lại sau hoặc liên hệ salon.</p>
+            </div>
+        }
+        else
+        {
+            <div class="service-pick-grid">
+                @foreach (var svc in Model)
+                {
+                    <article class="pick-card fade-up">
+                        <div class="thumb">
+                            @if (!string.IsNullOrEmpty(svc.ImageUrl))
+                            {
+                                <img src="@svc.ImageUrl" alt="@svc.Name" loading="lazy" />
+                            }
+                            else
+                            {
+                                <img src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=600&h=400&fit=crop" alt="@svc.Name" loading="lazy" />
+                            }
+                        </div>
+                        <div class="body">
+                            <h3>@svc.Name</h3>
+                            <p style="font-size:.88rem;margin:0">@svc.Description</p>
+                            <div class="meta">
+                                <span class="price">@svc.PriceDisplay</span>
+                                <span class="text-muted">@svc.DurationDisplay</span>
+                            </div>
+                            <a href="/Booking/SelectSlot?serviceId=@svc.Id&amp;date=@DateTime.Today.ToString("yyyy-MM-dd")" class="btn btn-primary btn-sm btn-cta">Chọn và tiếp tục</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</div>

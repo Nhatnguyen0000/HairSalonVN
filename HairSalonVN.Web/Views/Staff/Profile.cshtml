@@ -1,0 +1,69 @@
+@using HairSalonVN.Web.Models.Booking
+@model StaffDetailViewModel
+@{
+    ViewData["Title"] = "Hồ sơ Stylist";
+    ViewBag.DashboardRole = "Staff";
+    ViewBag.ActiveMenu = "profile";
+}
+
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Hồ sơ Stylist</h1>
+        <p class="luxe-date">@Model.Specialty</p>
+    </div>
+</div>
+
+<div class="luxe-content">
+    <div class="luxe-panel" style="max-width:640px;">
+        <div class="luxe-panel-body" style="padding:32px;">
+            <div class="profile-card-header">
+                <div class="luxe-avatar" style="width:72px;height:72px;font-size:1.8rem;">@Model.StaffInitial</div>
+                <div>
+                    <h2>@Model.StaffName</h2>
+                    <p style="margin:4px 0 8px;color:rgba(255,255,255,.55);">@Model.UserEmail</p>
+                    <span class="luxe-badge @(Model.IsAvailable ? "confirmed" : "cancelled")">
+                        @(Model.IsAvailable ? "Đang hoạt động" : "Tạm ngưng")
+                    </span>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Bio))
+            {
+                <p style="color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:20px;">@Model.Bio</p>
+            }
+            @if (Model.Services?.Any() == true)
+            {
+                <div class="staff-services">
+                    <span class="services-label">Dịch vụ</span>
+                    <div class="services-tags">
+                        @foreach (var svc in Model.Services)
+                        {
+                            <span class="service-tag">@svc</span>
+                        }
+                    </div>
+                </div>
+            }
+            @if (Model.WorkingHours?.Any() == true)
+            {
+                <div class="staff-hours" style="margin-top:24px;">
+                    <span class="hours-label">Giờ làm việc</span>
+                    <div class="luxe-table-wrap" style="margin-top:8px;">
+                        <table class="luxe-table">
+                            <thead><tr><th>Ngày</th><th>Bắt đầu</th><th>Kết thúc</th></tr></thead>
+                            <tbody>
+                                @foreach (var wh in Model.WorkingHours.OrderBy(w => w.DayOfWeek))
+                                {
+                                    var days = new[] { "CN", "T2", "T3", "T4", "T5", "T6", "T7" };
+                                    <tr>
+                                        <td>@(wh.DayOfWeek >= 0 && wh.DayOfWeek < 7 ? days[wh.DayOfWeek] : "")</td>
+                                        <td>@wh.StartTime</td>
+                                        <td>@wh.EndTime</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

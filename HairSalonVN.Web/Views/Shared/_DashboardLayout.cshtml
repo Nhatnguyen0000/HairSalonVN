@@ -1,0 +1,73 @@
+@{
+    var title = ViewData["Title"] as string ?? "Dashboard";
+    var dashRole = (ViewBag.DashboardRole as string ?? "Admin").ToLowerInvariant();
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="LUXE Hair Salon - @dashRole Dashboard" />
+    <title>@title – LUXE Hair Salon</title>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <link rel="stylesheet" href="~/css/salon.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="dashboard-body role-@dashRole">
+    <button type="button" class="dash-menu-toggle" id="dashMenuToggle" aria-label="Mở menu điều hướng">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+    </button>
+    <div class="dash-sidebar-backdrop" id="dashSidebarBackdrop" aria-hidden="true"></div>
+    <div class="dash-shell">
+        @await Html.PartialAsync("_DashboardSidebar")
+        <main class="dash-main">
+            @RenderBody()
+        </main>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/salon.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var toggle = document.getElementById('dashMenuToggle');
+            var backdrop = document.getElementById('dashSidebarBackdrop');
+            var sidebar = document.querySelector('.dash-sidebar');
+            if (!toggle || !sidebar || !backdrop) return;
+            function closeMenu() {
+                sidebar.classList.remove('open');
+                backdrop.classList.remove('visible');
+                document.body.style.overflow = '';
+            }
+            function openMenu() {
+                sidebar.classList.add('open');
+                backdrop.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+            toggle.addEventListener('click', function () {
+                if (sidebar.classList.contains('open')) closeMenu();
+                else openMenu();
+            });
+            backdrop.addEventListener('click', closeMenu);
+            window.addEventListener('resize', function () {
+                if (window.innerWidth > 900) closeMenu();
+            });
+        })();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

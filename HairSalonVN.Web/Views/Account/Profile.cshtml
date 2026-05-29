@@ -1,0 +1,471 @@
+@using HairSalonVN.Web.Models.Auth
+@model ProfileViewModel
+@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    ViewData["Title"] = "Hồ sơ của tôi";
+    var roleLabel = Model.Role switch
+    {
+        "Admin" => "Quản trị viên",
+        "Staff" => "Stylist",
+        _ => "Khách hàng"
+    };
+    var roleColor = Model.Role switch
+    {
+        "Admin" => "#e8b04b",
+        "Staff" => "#22c55e",
+        _ => "#60a5fa"
+    };
+    ViewBag.DashboardRole = Model.Role == "Admin" ? "Admin"
+        : Model.Role == "Staff" ? "Staff" : "Customer";
+    ViewBag.ActiveMenu = "profile";
+}
+
+<!-- Topbar -->
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Hồ sơ của tôi</h1>
+        <p class="luxe-date">Quản lý thông tin cá nhân</p>
+    </div>
+</div>
+
+<!-- Content -->
+<div class="luxe-content">
+    <div class="profile-layout">
+        <!-- Profile Card -->
+        <div class="profile-card">
+            <!-- Avatar Section -->
+            <div class="profile-avatar-section">
+                <div class="profile-avatar">
+                    @(string.IsNullOrEmpty(Model.FullName) ? '?' : char.ToUpper(Model.FullName[0]))
+                </div>
+                <div class="profile-avatar-info">
+                    <h2 class="profile-name">@Model.FullName</h2>
+                    <span class="profile-role" style="color: @roleColor; background: rgba(@(Model.Role == "Admin" ? "232,176,75" : Model.Role == "Staff" ? "34,197,94" : "96,165,250"), 0.12);">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        @roleLabel
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <span class="profile-stat-value">
+                        <a href="/Booking/MyBookings" class="stat-link">Lịch hẹn</a>
+                    </span>
+                    <span class="profile-stat-label">Đặt lịch ngay</span>
+                </div>
+                <div class="profile-stat-divider"></div>
+                <div class="profile-stat">
+                    <span class="profile-stat-value">
+                        <a href="/Booking" class="stat-link">Đặt mới</a>
+                    </span>
+                    <span class="profile-stat-label">Dịch vụ mới</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="profile-form-card">
+            <div class="profile-form-header">
+                <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Chỉnh sửa thông tin
+                </h3>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="salon-alert salon-alert-success">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                        <polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                    @TempData["Success"]
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="salon-alert salon-alert-error">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    @TempData["Error"]
+                </div>
+            }
+
+            <form asp-action="UpdateProfile" method="post" class="profile-edit-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <div class="form-grid">
+                    <div class="form-group-modern">
+                        <label class="salon-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Họ và tên
+                        </label>
+                        <input type="text" name="fullName" class="modern-input" 
+                               value="@Model.FullName" placeholder="Nhập họ và tên" required minlength="2" maxlength="100" />
+                        <span class="field-hint">Tên hiển thị trên hồ sơ</span>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <label class="salon-label">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                            </svg>
+                            Số điện thoại
+                        </label>
+                        <input type="tel" name="phone" class="modern-input" 
+                               value="@Model.Phone" placeholder="0912345678" pattern="[0-9+\s-]{9,12}" />
+                        <span class="field-hint">Số điện thoại liên hệ (tùy chọn)</span>
+                    </div>
+                </div>
+
+                <div class="form-group-modern form-group-full">
+                    <label class="salon-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        Email
+                    </label>
+                    <input type="email" class="modern-input" value="@Model.Email" disabled />
+                    <span class="field-hint field-hint-info">Email không thể thay đổi</span>
+                </div>
+
+                <div class="profile-form-actions">
+                    <button type="submit" class="btn-profile-save">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                            <polyline points="17,21 17,13 7,13 7,21"/>
+                            <polyline points="7,3 7,8 15,8"/>
+                        </svg>
+                        Lưu thay đổi
+                    </button>
+                    <a href="/Account/Profile" class="btn-profile-cancel">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Profile Layout */
+    .profile-layout {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 24px;
+        max-width: 1000px;
+    }
+
+    /* Profile Card */
+    .profile-card {
+        background: var(--c-bg-card);
+        border: 1px solid var(--luxe-border);
+        border-radius: 20px;
+        padding: 28px;
+        height: fit-content;
+    }
+
+    .profile-avatar-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--luxe-border-light);
+        margin-bottom: 24px;
+    }
+
+    .profile-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--luxe-gold), var(--luxe-gold-dark));
+        color: #0a0a0e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 32px rgba(201, 169, 98, 0.3);
+    }
+
+    .profile-avatar-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .profile-name {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        color: #fff;
+        margin: 0;
+    }
+
+    .profile-role {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        width: fit-content;
+        margin: 0 auto;
+    }
+
+    /* Stats */
+    .profile-stats {
+        display: flex;
+        gap: 0;
+    }
+
+    .profile-stat {
+        flex: 1;
+        text-align: center;
+    }
+
+    .profile-stat-divider {
+        width: 1px;
+        background: var(--luxe-border-light);
+        margin: 0 16px;
+    }
+
+    .profile-stat-value {
+        display: block;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--luxe-gold);
+        margin-bottom: 4px;
+    }
+
+    .stat-link {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .stat-link:hover {
+        color: var(--luxe-gold-bright);
+    }
+
+    .profile-stat-label {
+        font-size: 0.75rem;
+        color: var(--luxe-text-muted);
+    }
+
+    /* Form Card */
+    .profile-form-card {
+        background: var(--c-bg-card);
+        border: 1px solid var(--luxe-border);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .profile-form-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--luxe-border-light);
+        background: linear-gradient(135deg, rgba(201, 169, 98, 0.08), transparent);
+    }
+
+    .profile-form-header h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        font-size: 1rem;
+        color: #fff;
+    }
+
+    .profile-form-header h3 svg {
+        color: var(--luxe-gold);
+    }
+
+    .profile-edit-form {
+        padding: 24px;
+    }
+
+    .form-group-modern {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group-full {
+        grid-column: span 2;
+    }
+
+    .salon-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 500;
+    }
+
+    .salon-label svg {
+        color: var(--luxe-gold);
+        flex-shrink: 0;
+    }
+
+    .modern-input {
+        padding: 14px 16px;
+        border: 1px solid var(--luxe-border);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.25);
+        color: #fff;
+        font-size: 0.95rem;
+        font-family: var(--font-body);
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .modern-input:focus {
+        outline: none;
+        border-color: var(--luxe-gold);
+        box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
+    }
+
+    .modern-input:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .modern-input::placeholder {
+        color: var(--luxe-text-muted);
+    }
+
+    .field-hint {
+        font-size: 0.75rem;
+        color: var(--luxe-text-muted);
+    }
+
+    .field-hint-info {
+        color: var(--luxe-gold);
+        opacity: 0.7;
+    }
+
+    /* Form Actions */
+    .profile-form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid var(--luxe-border-light);
+    }
+
+    .btn-profile-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, var(--luxe-gold), var(--luxe-gold-dark));
+        color: #0a0a0e;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        font-family: var(--font-body);
+    }
+
+    .btn-profile-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(201, 169, 98, 0.35);
+    }
+
+    .btn-profile-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-family: var(--font-body);
+    }
+
+    .btn-profile-cancel:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Alerts */
+    .salon-alert {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        margin: 0 24px 16px;
+    }
+
+    .salon-alert-success {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        color: #86efac;
+    }
+
+    .salon-alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+    }
+
+    /* Responsive */
+    @@media (max-width: 900px) {
+        .profile-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-card {
+            order: -1;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .profile-edit-form {
+            padding: 20px;
+        }
+
+        .profile-form-actions {
+            flex-direction: column;
+        }
+
+        .btn-profile-save,
+        .btn-profile-cancel {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>

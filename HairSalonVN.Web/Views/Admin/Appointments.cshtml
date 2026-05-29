@@ -1,0 +1,210 @@
+@using HairSalonVN.Web.Models.Booking
+@model IEnumerable<AppointmentViewModel>
+@{
+    ViewData["Title"] = "Quản lý lịch hẹn";
+    ViewBag.DashboardRole = "Admin";
+    ViewBag.ActiveMenu = "appointments";
+    var list = Model?.ToList() ?? new List<AppointmentViewModel>();
+    ViewBag.PendingCount = list.Count(a => a.Status == "Pending");
+
+    string StatusLabel(string status) => status switch
+    {
+        "Pending" => "Chờ xác nhận",
+        "Confirmed" => "Đã xác nhận",
+        "Completed" => "Hoàn thành",
+        "Cancelled" => "Đã hủy",
+        _ => status
+    };
+    string StatusCls(string status) => status switch
+    {
+        "Pending" => "pending",
+        "Confirmed" => "confirmed",
+        "Completed" => "completed",
+        "Cancelled" => "cancelled",
+        _ => ""
+    };
+
+    // Local transition helper (mirrors AppointmentStatus.CanTransition without DB reference)
+    bool CanTransitionTo(string from, string to) => (from, to) switch
+    {
+        ("Pending", "Confirmed") => true,
+        ("Pending", "Cancelled") => true,
+        ("Confirmed", "Completed") => true,
+        ("Confirmed", "Cancelled") => true,
+        _ => false
+    };
+}
+
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Quản lý lịch hẹn</h1>
+        <p class="luxe-date">@list.Count lịch hẹn trong hệ thống</p>
+    </div>
+</div>
+
+<div class="luxe-content">
+    <div class="luxe-panel">
+        <div class="luxe-panel-body">
+            <div class="luxe-filter-bar">
+                <div class="luxe-filter-group">
+                    <label>Trạng thái</label>
+                    <select id="statusFilter" class="luxe-select" onchange="filterAppointments()">
+                        <option value="">Tất cả</option>
+                        <option value="Pending">Chờ xác nhận</option>
+                        <option value="Confirmed">Đã xác nhận</option>
+                        <option value="Completed">Hoàn thành</option>
+                        <option value="Cancelled">Đã hủy</option>
+                    </select>
+                </div>
+                <div class="luxe-filter-group">
+                    <label>Ngày</label>
+                    <input type="date" id="dateFilter" class="luxe-input-sm" onchange="filterAppointments()" />
+                </div>
+                <button type="button" class="luxe-btn luxe-btn-outline" onclick="resetFilters()">Đặt lại</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="luxe-panel">
+        <div class="luxe-panel-head">
+            <h2>Tất cả lịch hẹn</h2>
+        </div>
+        <div class="luxe-panel-body">
+            @if (!list.Any())
+            {
+                <div class="luxe-empty">
+                    <p>Chưa có lịch hẹn nào</p>
+                    <small>Khi có khách đặt lịch, họ sẽ xuất hiện ở đây</small>
+                </div>
+            }
+            else
+            {
+                <div class="luxe-table-wrap">
+                    <table class="luxe-table" id="appointmentsTable">
+                        <thead>
+                            <tr>
+                                <th>Mã đặt</th>
+                                <th>Khách hàng</th>
+                                <th>Stylist</th>
+                                <th>Dịch vụ</th>
+                                <th>Ngày giờ</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appt in list)
+                            {
+                                <tr data-status="@appt.Status" data-date="@appt.AppointmentDate.ToString("yyyy-MM-dd")">
+                                    <td><span class="luxe-code">@appt.BookingCode</span></td>
+                                    <td>
+                                        <div class="luxe-person">
+                                            <div class="luxe-avatar">@(string.IsNullOrEmpty(appt.CustomerName) ? '?' : appt.CustomerName[0])</div>
+                                            <div>
+                                                <div class="luxe-person-name">@appt.CustomerName</div>
+                                                <div class="luxe-person-sub">@appt.CustomerPhone</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="luxe-person">
+                                            <div class="luxe-avatar">@appt.StaffInitial</div>
+                                            <div class="luxe-person-name">@appt.StaffName</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="luxe-person-name">@appt.ServiceName</div>
+                                        <div class="luxe-price">@appt.PriceDisplay</div>
+                                    </td>
+                                    <td>
+                                        <div class="luxe-date-cell">
+                                            <span class="date">@appt.AppointmentDate.ToString("dd/MM/yyyy")</span>
+                                            <span class="time">@appt.AppointmentDate.ToString("HH:mm")</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="luxe-badge @StatusCls(appt.Status)">@StatusLabel(appt.Status)</span></td>
+                                    <td>
+                                        <div class="luxe-action-row">
+                                            @if (CanTransitionTo(appt.Status, "Confirmed"))
+                                            {
+                                                <button type="button" class="luxe-btn-sm confirm"
+                                                        data-original="Xác nhận"
+                                                        onclick="updateStatus('@appt.Id', 'Confirmed', this)">Xác nhận</button>
+                                            }
+                                            @if (CanTransitionTo(appt.Status, "Completed"))
+                                            {
+                                                <button type="button" class="luxe-btn-sm complete"
+                                                        data-original="Hoàn thành"
+                                                        onclick="updateStatus('@appt.Id', 'Completed', this)">Hoàn thành</button>
+                                            }
+                                            @if (CanTransitionTo(appt.Status, "Cancelled"))
+                                            {
+                                                <button type="button" class="luxe-btn-sm cancel"
+                                                        data-original="Hủy"
+                                                        onclick="updateStatus('@appt.Id', 'Cancelled', this)">Hủy</button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function() {
+    function updateStatus(id, status, btn) {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '...';
+        var formData = new FormData();
+        formData.append('id', id);
+        formData.append('status', status);
+        formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+        fetch('/Admin/UpdateAppointmentStatus', { method: 'POST', body: formData })
+            .then(function(r) { return r.json(); })
+            .then(function(resp) {
+                if (resp.success) {
+                    showToast(resp.message || 'Cập nhật thành công!', 'success');
+                    setTimeout(function() { location.reload(); }, 800);
+                } else {
+                    showToast(resp.message || 'Có lỗi xảy ra', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = btn.dataset.original || btn.textContent;
+                }
+            })
+            .catch(function() {
+                showToast('Không thể kết nối máy chủ', 'error');
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.original || btn.textContent;
+            });
+    }
+    document.querySelectorAll('.luxe-btn-sm').forEach(function(b) {
+        if (b.onclick && b.onclick.toString().includes('updateStatus')) {
+            b.dataset.original = b.textContent.trim();
+        }
+    });
+    window.updateStatus = updateStatus;
+    window.filterAppointments = function() {
+        var statusFilter = document.getElementById('statusFilter').value;
+        var dateFilter = document.getElementById('dateFilter').value;
+        document.querySelectorAll('#appointmentsTable tbody tr').forEach(function(row) {
+            var show = true;
+            if (statusFilter && row.dataset.status !== statusFilter) show = false;
+            if (dateFilter && row.dataset.date !== dateFilter) show = false;
+            row.style.display = show ? '' : 'none';
+        });
+    };
+    window.resetFilters = function() {
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('dateFilter').value = '';
+        filterAppointments();
+    };
+})();
+</script>
+}

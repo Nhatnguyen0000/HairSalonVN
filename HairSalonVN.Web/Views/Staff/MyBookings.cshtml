@@ -1,0 +1,175 @@
+@using HairSalonVN.Web.Models.Booking
+@model StaffMyBookingsViewModel
+@{
+    ViewData["Title"] = "Lịch sử Stylist";
+    ViewBag.DashboardRole = "Staff";
+    ViewBag.ActiveMenu = "staffhistory";
+
+    var totalCount = Model.AllAppointments.Count;
+    string StatusLabel(string status) => status switch
+    {
+        "Pending" => "Chờ xác nhận",
+        "Confirmed" => "Đã xác nhận",
+        "Completed" => "Hoàn thành",
+        "Cancelled" => "Đã hủy",
+        _ => status
+    };
+    string StatusCls(string status) => status switch
+    {
+        "Pending" => "pending",
+        "Confirmed" => "confirmed",
+        "Completed" => "completed",
+        "Cancelled" => "cancelled",
+        _ => ""
+    };
+}
+
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Lịch sử Stylist</h1>
+        <p class="luxe-date">Danh sách tất cả đơn hàng bạn đã thực hiện</p>
+    </div>
+    <div class="luxe-topbar-right">
+        <span class="luxe-role-chip">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            Stylist
+        </span>
+    </div>
+</div>
+
+<div class="luxe-content">
+    <div class="luxe-stats">
+        <div class="stat-card stat-card-primary">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@totalCount</span>
+                <span class="stat-text">Tổng đơn</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-success">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.CompletedCount</span>
+                <span class="stat-text">Hoàn thành</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-warning">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.PendingCount</span>
+                <span class="stat-text">Chờ xác nhận</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-gold">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.RevenueDisplay</span>
+                <span class="stat-text">Doanh thu (VNĐ)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="luxe-panel">
+        <div class="luxe-panel-head">
+            <h2>Tất cả đơn hàng</h2>
+            <span class="luxe-badge pending">@totalCount đơn</span>
+        </div>
+        <div class="luxe-panel-body">
+            @if (!Model.AllAppointments.Any())
+            {
+                <div class="luxe-empty">
+                    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <p>Chưa có đơn hàng nào</p>
+                    <small>Đơn hàng sẽ xuất hiện ở đây khi khách đặt lịch với bạn</small>
+                </div>
+            }
+            else
+            {
+                <div class="luxe-table-wrap">
+                    <table class="luxe-table">
+                        <thead>
+                            <tr>
+                                <th>Khách hàng</th>
+                                <th>Dịch vụ</th>
+                                <th>Thời gian</th>
+                                <th>Giá</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var appt in Model.AllAppointments)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="luxe-person">
+                                            <div class="luxe-avatar">@(string.IsNullOrEmpty(appt.CustomerName) ? '?' : appt.CustomerName[0])</div>
+                                            <div>
+                                                <div class="luxe-person-name">@(string.IsNullOrEmpty(appt.CustomerName) ? appt.GuestName ?? "Khách" : appt.CustomerName)</div>
+                                                <div class="luxe-person-sub">@(string.IsNullOrEmpty(appt.CustomerPhone) ? (appt.GuestPhone ?? "") : appt.CustomerPhone)</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(appt.ServiceImageUrl))
+                                        {
+                                            <div style="display:flex;align-items:center;gap:10px;">
+                                                <img src="@appt.ServiceImageUrl" alt="@appt.ServiceName"
+                                                     style="width:42px;height:42px;object-fit:cover;border-radius:8px;flex-shrink:0;"
+                                                     onerror="this.style.display='none'" />
+                                                <span class="luxe-person-name">@appt.ServiceName</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="luxe-person-name">@appt.ServiceName</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="luxe-date-cell">
+                                            <span class="date">@appt.AppointmentDate.ToString("dd/MM/yyyy")</span>
+                                            <span class="time">@appt.AppointmentDate.ToString("HH:mm")</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="luxe-price">@appt.ServicePrice.ToString("N0")đ</span></td>
+                                    <td>
+                                        <span class="luxe-badge @StatusCls(appt.Status)">@StatusLabel(appt.Status)</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

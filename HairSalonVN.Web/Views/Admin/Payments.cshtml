@@ -1,0 +1,216 @@
+@using HairSalonVN.Web.Models.Admin
+@model PaymentsPageViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+    ViewBag.DashboardRole = "Admin";
+    ViewBag.ActiveMenu = "payments";
+
+    var payments = Model.Payments?.ToList() ?? new List<PaymentViewModel>();
+    var apiBase = "https://localhost:7098/api";
+}
+
+<div class="luxe-topbar">
+    <div class="luxe-topbar-left">
+        <h1>Thanh toán</h1>
+        <p class="luxe-date">Quản lý thanh toán MoMo</p>
+    </div>
+</div>
+
+<div class="luxe-content">
+
+    <!-- MoMo Info Card -->
+    <div class="momo-section">
+        <div class="momo-qr-card">
+            <div class="momo-qr-header">
+                <div class="momo-qr-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="11" fill="#a50064"/>
+                        <path d="M8 14.5c0-2 1.5-3 3-3.5 1-.3 1.3-.7 1.3-1.2 0-.5-.3-.9-1-.9-.7 0-1.3.4-1.3 1.1H8.5c0-1.5 1.2-2.6 2.8-2.6 1.5 0 2.5 1 2.5 2.3 0 1-.5 1.7-1.6 2.2-1.3.6-1.8.9-1.8 1.6 0 .5.4.9 1.2.9.9 0 1.6-.5 1.6-1.3h1.5c0 1.7-1.4 2.8-3 2.8-1.8.1-3.2-1.1-3.2-2.4z" fill="white"/>
+                    </svg>
+                </div>
+                <div class="momo-qr-title">
+                    <h3>Thanh toán MoMo</h3>
+                    <p>Quét mã QR để thanh toán nhanh</p>
+                </div>
+            </div>
+            <div class="momo-qr-body">
+                <div class="momo-qr-image" id="momoQrContainer">
+                    <div class="momo-qr-loading" id="momoQrLoading">
+                        <div class="spinner-sm"></div>
+                        <span>Đang tải mã QR...</span>
+                    </div>
+                    <img id="momoQrImg" style="display:none" alt="MoMo QR" />
+                </div>
+                <div class="momo-qr-info">
+                    <div class="momo-info-row">
+                        <span class="momo-label">Số điện thoại</span>
+                        <div class="momo-value-row">
+                            <span class="momo-phone-value">@PaymentConstants.MoMoPhone</span>
+                            <button class="momo-copy-btn" onclick="copyMomoPhone()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="momo-info-row">
+                        <span class="momo-label">Tên tài khoản</span>
+                        <span class="momo-name-value">@PaymentConstants.MoMoName</span>
+                    </div>
+                    <div class="momo-info-row">
+                        <span class="momo-label">Nội dung thanh toán</span>
+                        <span class="momo-note-value">Thanh toán HairSalon LUXE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="luxe-stats">
+        <div class="stat-card stat-card-gold">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.TotalThisMonth.ToString("N0")đ</span>
+                <span class="stat-text">Thu tháng này (@Model.CountThisMonth giao dịch)</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card-success">
+            <div class="stat-card-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                    <polyline points="22,4 12,14.01 9,11.01"/>
+                </svg>
+            </div>
+            <div class="stat-card-body">
+                <span class="stat-number">@Model.TotalPaid.ToString("N0")đ</span>
+                <span class="stat-text">Tổng đã thu (@payments.Count giao dịch)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="luxe-panel">
+        <div class="luxe-panel-head">
+            <h2>Lịch sử giao dịch</h2>
+            @if (payments.Any())
+            {
+                <span class="luxe-badge pending">@payments.Count giao dịch</span>
+            }
+        </div>
+        <div class="luxe-panel-body">
+            @if (!payments.Any())
+            {
+                <div class="luxe-empty">
+                    <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="1" y="4" width="22" height="16" rx="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                    <p>Chưa có giao dịch nào</p>
+                    <small>Các giao dịch sẽ xuất hiện sau khi khách thanh toán thành công</small>
+                </div>
+            }
+            else
+            {
+                <div class="luxe-table-wrap">
+                    <table class="luxe-table">
+                        <thead>
+                            <tr>
+                                <th>Mã đặt</th>
+                                <th>Khách hàng</th>
+                                <th>Dịch vụ</th>
+                                <th>Số tiền</th>
+                                <th>Phương thức</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in payments)
+                            {
+                                <tr>
+                                    <td><span class="luxe-code">@p.BookingCode</span></td>
+                                    <td>
+                                        <div class="luxe-person">
+                                            <div class="luxe-avatar">@GetInitial(p.CustomerName)</div>
+                                            <div>
+                                                <div class="luxe-person-name">@p.CustomerName</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@p.ServiceName</td>
+                                    <td><span class="luxe-price">@p.AmountDisplay</span></td>
+                                    <td>
+                                        @if (p.Method == "MoMo")
+                                        {
+                                            <span class="momo-badge">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="11" fill="#a50064"/></svg>
+                                                MoMo
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            @p.MethodLabel
+                                        }
+                                    </td>
+                                    <td><span class="luxe-badge confirmed">@p.Status</span></td>
+                                    <td>@p.PaidAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    function loadMoMoQR() {
+        var container = document.getElementById('momoQrContainer');
+        var loading = document.getElementById('momoQrLoading');
+        var img = document.getElementById('momoQrImg');
+        fetch('@apiBase/payment/momo-qr')
+            .then(function(r) { return r.json(); })
+            .then(function(resp) {
+                if (resp.success && resp.data && resp.data.qrBase64) {
+                    img.src = resp.data.qrBase64;
+                    img.style.display = 'block';
+                    loading.style.display = 'none';
+                } else {
+                    loading.innerHTML = '<span>Không thể tải mã QR</span>';
+                }
+            })
+            .catch(function() {
+                loading.innerHTML = '<span>Lỗi kết nối</span>';
+            });
+    }
+
+    window.copyMomoPhone = function() {
+        navigator.clipboard.writeText('@PaymentConstants.MoMoPhone').then(function() {
+            var btns = document.querySelectorAll('.momo-copy-btn');
+            for (var i = 0; i < btns.length; i++) {
+                btns[i].innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg> Đã copy!';
+            }
+        });
+    };
+
+    loadMoMoQR();
+})();
+</script>
+
+@functions {
+    static string GetInitial(string? name)
+    {
+        if (string.IsNullOrEmpty(name) || name.Length == 0) return "?";
+        return name[0].ToString().ToUpper();
+    }
+}
