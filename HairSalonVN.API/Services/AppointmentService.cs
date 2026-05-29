@@ -315,15 +315,11 @@ namespace HairSalonVN.API.Services
             var service = await _svcRepo.GetByIdAsync(serviceId);
             var duration = service?.DurationMinutes ?? 60;
 
-            var workingHour = await _whRepo.FindAsync(w => w.StaffId == staffId && w.DayOfWeek == (int)date.DayOfWeek);
-            var wh = workingHour.FirstOrDefault();
-
             var slots = new List<AvailableSlotDto>();
-            if (wh == null)
-                return slots;
-
-            var dayStart = date.Date.Add(wh.StartTime);
-            var dayEnd = date.Date.Add(wh.EndTime);
+            
+            // FIX: Hardcode giờ làm việc 8h-16h (không phụ thuộc database)
+            var dayStart = date.Date.AddHours(8);   // 08:00
+            var dayEnd = date.Date.AddHours(16);     // 16:00
             var now = DateTime.Now;
 
             // Doc lich da dat tu DB moi nhat
@@ -337,6 +333,12 @@ namespace HairSalonVN.API.Services
                 .ToListAsync();
 
             var start = dayStart < now ? now : dayStart;
+            // Round up to next 30 min if needed
+            if (start.Minute % 30 != 0)
+            {
+                start = start.AddMinutes(30 - start.Minute % 30);
+            }
+
             while (start.AddMinutes(duration) <= dayEnd)
             {
                 var end = start.AddMinutes(duration);
