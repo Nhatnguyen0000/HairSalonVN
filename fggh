@@ -1,0 +1,2 @@
+gh auth login
+gh repo create HairSalonVN --public --source=. --push
