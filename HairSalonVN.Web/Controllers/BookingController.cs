@@ -74,9 +74,17 @@ namespace HairSalonVN.Web.Controllers
         // ── AJAX: Lấy slot trống (gọi từ JS) ─────────────────────
         [HttpGet]
         public async Task<IActionResult> GetSlots(
-            Guid staffId, Guid serviceId, DateTime date)
+            [FromQuery] Guid staffId,
+            [FromQuery] Guid serviceId,
+            [FromQuery] string date)
         {
-            var r = await _booking.GetSlotsAsync(staffId, serviceId, date);
+            // Parse date từ string vì JS gửi format yyyy-MM-dd
+            if (!DateTime.TryParse(date, out var parsedDate))
+            {
+                return Json(new { success = false, message = "Ngày không hợp lệ." });
+            }
+
+            var r = await _booking.GetSlotsAsync(staffId, serviceId, parsedDate);
             if (r == null)
                 return Json(new { success = false, message = "Không thể tải khung giờ. Vui lòng thử lại." });
             return Json(new { success = r.Success, data = r.Data, message = r.Message, errors = r.Errors });

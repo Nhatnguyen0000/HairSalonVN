@@ -274,11 +274,14 @@
         timeslotContent.innerHTML =
             '<div class="timeslot-loading"><div class="timeslot-loading-spinner"></div><p>Đang tải khung giờ...</p></div>';
 
+        // Đảm bảo date format đúng yyyy-MM-dd
+        var dateValue = selectedDateInput.value;
         var url = '/Booking/GetSlots?staffId=' + selectedStylistId +
                   '&serviceId=' + serviceId +
-                  '&date=' + encodeURIComponent(selectedDateInput.value);
+                  '&date=' + encodeURIComponent(dateValue);
 
         console.log('Loading slots from:', url);
+        console.log('Date value:', dateValue);
 
         fetch(url)
             .then(function(r) {
