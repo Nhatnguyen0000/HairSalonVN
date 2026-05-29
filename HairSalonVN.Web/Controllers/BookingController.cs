@@ -4,6 +4,8 @@ using HairSalonVN.Web.Models.Booking;
 using HairSalonVN.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using HairSalonVN.Web.Models.Shared;
+using HairSalonVN.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace HairSalonVN.Web.Controllers
 {
@@ -13,10 +15,11 @@ namespace HairSalonVN.Web.Controllers
         private readonly BookingApiService _booking;
         private readonly ServiceApiService _services;
         private readonly ReviewApiService _reviews;
+        private readonly IConfiguration _config;
 
         public BookingController(
-            BookingApiService b, ServiceApiService s, ReviewApiService r)
-        { _booking = b; _services = s; _reviews = r; }
+            BookingApiService b, ServiceApiService s, ReviewApiService r, IConfiguration config)
+        { _booking = b; _services = s; _reviews = r; _config = config; }
 
         // ── BƯỚC 1: Chọn dịch vụ ─────────────────────────────────
         [HttpGet]
@@ -78,16 +81,100 @@ namespace HairSalonVN.Web.Controllers
             [FromQuery] Guid serviceId,
             [FromQuery] string date)
         {
-            // Parse date từ string vì JS gửi format yyyy-MM-dd
-            if (!DateTime.TryParse(date, out var parsedDate))
+            try
             {
-                return Json(new { success = false, message = "Ngày không hợp lệ." });
+                // Parse date từ string vì JS gửi format yyyy-MM-dd
+                if (!DateTime.TryParse(date, out var parsedDate))
+                {
+                    return Json(new { success = false, message = "Ngày không hợp lệ." });
+                }
+
+                // Gọi trực tiếp database để lấy slots
+                var connStr = _config.GetConnectionString("DefaultConnection");
+                if (string.IsNullOrEmpty(connStr))
+                {
+                    return Json(new { success = false, message = "Không có kết nối database." });
+                }
+
+                var slots = await GetAvailableSlotsFromDbAsync(staffId, serviceId, parsedDate.Date, connStr);
+                return Json(new { success = true, data = slots });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        private async Task<List<object>> GetAvailableSlotsFromDbAsync(Guid staffId, Guid serviceId, DateTime date, string connStr)
+        {
+            var slots = new List<object>();
+
+            await using var conn = new Microsoft.Data.SqlClient.SqlConnection(connStr);
+            await conn.OpenAsync();
+
+            // Lấy duration của service
+            int duration = 60;
+            using (var cmd = new Microsoft.Data.SqlClient.SqlCommand(
+                "SELECT DurationMinutes FROM Services WHERE Id = @ServiceId", conn))
+            {
+                cmd.Parameters.AddWithValue("@ServiceId", serviceId);
+                var result = await cmd.ExecuteScalarAsync();
+                if (result != null && result != DBNull.Value)
+                    duration = Convert.ToInt32(result);
             }
 
-            var r = await _booking.GetSlotsAsync(staffId, serviceId, parsedDate);
-            if (r == null)
-                return Json(new { success = false, message = "Không thể tải khung giờ. Vui lòng thử lại." });
-            return Json(new { success = r.Success, data = r.Data, message = r.Message, errors = r.Errors });
+            // Lấy các lịch hẹn đã đặt trong ngày
+            var bookedTimes = new List<DateTime>();
+            using (var cmd = new Microsoft.Data.SqlClient.SqlCommand(@"
+                SELECT a.AppointmentDate, s.DurationMinutes 
+                FROM Appointments a 
+                JOIN Services s ON a.ServiceId = s.Id 
+                WHERE a.StaffId = @StaffId 
+                  AND CAST(a.AppointmentDate AS DATE) = CAST(@Date AS DATE)
+                  AND a.Status NOT IN ('Cancelled', 'NoShow')", conn))
+            {
+                cmd.Parameters.AddWithValue("@StaffId", staffId);
+                cmd.Parameters.AddWithValue("@Date", date);
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var apptTime = reader.GetDateTime(0);
+                    var apptDuration = reader.IsDBNull(1) ? 60 : reader.GetInt32(1);
+                    bookedTimes.Add(apptTime);
+                }
+            }
+
+            // Tạo slots từ 8h-16h
+            var dayStart = date.Date.AddHours(8);
+            var dayEnd = date.Date.AddHours(16);
+            var now = DateTime.Now;
+
+            var start = dayStart < now ? now : dayStart;
+            if (start.Minute % 30 != 0)
+            {
+                start = start.AddMinutes(30 - start.Minute % 30);
+            }
+
+            while (start.AddMinutes(duration) <= dayEnd)
+            {
+                var end = start.AddMinutes(duration);
+                var isAvailable = !bookedTimes.Any(b => b < end && b.AddMinutes(duration) > start);
+
+                slots.Add(new
+                {
+                    startTime = start.TimeOfDay.ToString(@"hh\:mm\:ss"),
+                    endTime = end.TimeOfDay.ToString(@"hh\:mm\:ss"),
+                    label = start.ToString("HH:mm"),
+                    time = start.ToString("HH:mm"),
+                    isAvail = isAvailable,
+                    isAvailable = isAvailable,
+                    isAvailBool = isAvailable
+                });
+
+                start = start.AddMinutes(30);
+            }
+
+            return slots;
         }
 
         // ── BƯỚC 3: Trang xác nhận (GET) ────────────────────────────────
